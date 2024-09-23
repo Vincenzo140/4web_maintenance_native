@@ -5,6 +5,7 @@ import {
   Animated,
   Easing,
   Alert,
+  Linking, // Importar Linking
 } from "react-native";
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Audio } from "expo-av";
@@ -76,7 +77,9 @@ export default function LoginScreen() {
         if (isNameValid && isEmailValid && isEmailDomainValid && isPasswordValid) {
           setSubmitted(true);
           Alert.alert("Success", `Name: ${name}\nEmail: ${email}`);
-          navigation.navigate('Dashboard');
+          // Redirecionar para a URL
+          Linking.openURL('http://10.109.25.127:8081/screens/DashboardScreen')
+            .catch((err) => Alert.alert('Error', 'Não foi possível abrir o Dashboard.'));
         } else {
           Alert.alert("Error", "Please enter valid information.");
         }

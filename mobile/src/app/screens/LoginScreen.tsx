@@ -5,26 +5,26 @@ import {
   Animated,
   Easing,
   Alert,
-  ActivityIndicator,
 } from "react-native";
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Audio } from "expo-av";
 import { styled } from "nativewind";
-import NameInput  from '../../components/NameInput';
-import EmailInput  from '../../components/EmailInput';
-import  PasswordInput  from '../../components/PasswordInput';
-import  SubmitButton  from '../../components/SubmitButton';
-import  ThemeSwitch  from '../../components/ThemeSwitch';
-import  FeedbackMessage  from '../../components/FeedbackMessage';
-
-
-
-
-
-//TODO: import { NameInput, EmailInput, PasswordInput, SubmitButton, ThemeSwitch, FeedbackMessage } from './components'; // Importando componentes personalizados
+import NameInput from "../../components/NameInput";
+import EmailInput from "../../components/EmailInput";
+import PasswordInput from "../../components/PasswordInput";
+import SubmitButton from "../../components/SubmitButton";
+import ThemeSwitch from "../../components/ThemeSwitch";
+import FeedbackMessage from "../../components/FeedbackMessage";
 
 const StyledScrollView = styled(ScrollView);
 
+type RootStackParamList = {
+  Dashboard: undefined;
+  Login: undefined;
+};
+
 export default function LoginScreen() {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,7 +67,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const { sound } = await Audio.Sound.createAsync(
-        require('../../assets/sucess.mp3')
+        require('../../../assets/sucess.mp3')
       );
       await sound.playAsync();
 
@@ -76,11 +76,13 @@ export default function LoginScreen() {
         if (isNameValid && isEmailValid && isEmailDomainValid && isPasswordValid) {
           setSubmitted(true);
           Alert.alert("Success", `Name: ${name}\nEmail: ${email}`);
+          navigation.navigate('Dashboard');
         } else {
           Alert.alert("Error", "Please enter valid information.");
         }
       }, 2000);
     } catch (error) {
+      console.error(error);
       Alert.alert("Error", "Failed to play sound.");
       setLoading(false);
     }
@@ -106,7 +108,10 @@ export default function LoginScreen() {
           isValid={isPasswordValid}
         />
         <SubmitButton onPress={handleSubmit} loading={loading} />
-        <ThemeSwitch theme={theme} toggleTheme={() => setTheme(theme === "light" ? "dark-black" : "light")} />
+        <ThemeSwitch 
+          theme={theme} 
+          toggleTheme={() => setTheme(theme === "light" ? "dark" : "light")}
+        />
       </Animated.View>
     </StyledScrollView>
   );

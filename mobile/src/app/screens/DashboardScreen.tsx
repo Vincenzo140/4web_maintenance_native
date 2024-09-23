@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, Dimensions, StyleSheet } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 import SidebarMenu from '../../components/SidebarMenu'; // Importando o SidebarMenu
+import { useNavigation } from '@react-navigation/native'; // Importando o hook de navegação
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -51,10 +52,12 @@ const teamsData = {
 };
 
 export default function DashboardScreen() {
+  const navigation = useNavigation(); // Hook para navegação
+
   return (
     <View style={styles.container}>
       {/* Menu Lateral */}
-      <SidebarMenu />
+      <SidebarMenu navigation={navigation} />
 
       {/* Conteúdo Principal */}
       <ScrollView style={styles.content}>
@@ -65,11 +68,11 @@ export default function DashboardScreen() {
           <Text style={styles.cardTitle}>Máquinas</Text>
           <BarChart
             data={machineData}
-            width={screenWidth - 80} // Ajuste para ser responsivo
+            width={screenWidth - 80}
             height={220}
             fromZero
             chartConfig={chartConfig('#4CAF50')}
-            yAxisLabel="" 
+            yAxisLabel=""
             yAxisSuffix=""
           />
           <Text style={styles.cardFooter}>Total de Máquinas: {mockData.machines.total}</Text>

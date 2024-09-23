@@ -10,7 +10,11 @@ interface Machine {
   responsible: string;
 }
 
-export default function MachineScreen() {
+interface MachineScreenProps {
+  navigation: any; // Substitua por um tipo mais específico, se necessário
+}
+
+export default function MachineScreen({ navigation }: MachineScreenProps) {
   const [machines, setMachines] = useState<Machine[]>([
     { name: 'Máquina A', model: 'Modelo X', status: 'Operacional', location: 'Setor A', responsible: 'João Silva' },
     { name: 'Máquina B', model: 'Modelo Y', status: 'Manutenção', location: 'Setor B', responsible: 'Maria Souza' }
@@ -47,7 +51,7 @@ export default function MachineScreen() {
 
   return (
     <View style={styles.container}>
-      <SidebarMenu />
+      <SidebarMenu navigation={navigation} />
       <View style={styles.mainContent}>
         <Text style={styles.title}>Máquinas</Text>
         <FlatList

@@ -2,15 +2,27 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
 import SidebarMenu from '../../components/SidebarMenu'; // Ajuste o caminho conforme necessário
 
-const MaintenanceScreen = () => {
+interface Maintenance {
+  id: string;
+  machine: string;
+  date: string;
+  status: string;
+  technician: string;
+}
+
+interface MaintenanceScreenProps {
+  navigation: any; // Substitua por um tipo mais específico, se necessário
+}
+
+const MaintenanceScreen = ({ navigation }: MaintenanceScreenProps) => {
   // Estado para os dados da tabela
-  const [maintenances, setMaintenances] = useState([
+  const [maintenances, setMaintenances] = useState<Maintenance[]>([
     { id: '1', machine: 'Máquina A', date: '2023-08-01', status: 'Concluída', technician: 'Carlos' },
     { id: '2', machine: 'Máquina B', date: '2023-08-15', status: 'Pendente', technician: 'Ana' }
   ]);
 
   // Estado para os dados do formulário
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Omit<Maintenance, 'id'>>({
     machine: '',
     date: '',
     status: '',
@@ -24,13 +36,15 @@ const MaintenanceScreen = () => {
 
   // Função para adicionar uma nova manutenção
   const handleAddMaintenance = () => {
-    setMaintenances([...maintenances, { id: Date.now().toString(), ...formData }]);
-    setFormData({ machine: '', date: '', status: '', technician: '' });
+    if (formData.machine && formData.date) {
+      setMaintenances([...maintenances, { id: Date.now().toString(), ...formData }]);
+      setFormData({ machine: '', date: '', status: '', technician: '' });
+    }
   };
 
   return (
     <View style={styles.container}>
-      <SidebarMenu /> {/* Inclui o SidebarMenu */}
+      <SidebarMenu navigation={navigation} /> {/* Inclui o SidebarMenu */}
 
       <View style={styles.content}>
         <Text style={styles.title}>Manutenções</Text>

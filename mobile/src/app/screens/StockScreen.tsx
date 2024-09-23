@@ -1,43 +1,58 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Certifique-se de instalar o expo vector icons
+import { IoExit } from 'react-icons/io5';
+import { FaTachometerAlt, FaCogs, FaWrench, FaWarehouse, FaUsers } from 'react-icons/fa';
+
+interface Tool {
+  name: string;
+  code: string;
+  quantity: number;
+  date: string;
+}
 
 const StockScreen = () => {
-  const [tools, setTools] = useState<{ name: string; code: string; quantity: number; date: string }[]>([]);
-  const [newTool, setNewTool] = useState({ name: '', code: '', quantity: 0, date: '' });
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [newTool, setNewTool] = useState<Omit<Tool, 'quantity'>>({ name: '', code: '', date: '' });
+  const [quantity, setQuantity] = useState<number>(0);
 
   const handleAddTool = () => {
-    setTools([...tools, newTool]);
-    setNewTool({ name: '', code: '', quantity: 0, date: '' });
+    if (newTool.name && newTool.code && quantity > 0 && newTool.date) {
+      setTools([...tools, { ...newTool, quantity }]);
+      setNewTool({ name: '', code: '', date: '' });
+      setQuantity(0);
+    }
   };
 
   return (
     <View style={styles.container}>
       {/* Menu Lateral */}
       <View style={styles.sidebar}>
-        <Text style={styles.username}>Vincenzo Amendola</Text>
-        {/* Adicione seus itens de menu aqui */}
-        <View style={styles.menuItem}>
-          <Ionicons name="home-outline" size={24} color="white" />
-          <Text style={styles.menuText}>Dashboards</Text>
+        <Text style={styles.sidebarTitle}>Vincenzo Amendola</Text>
+        <View style={styles.menu}>
+          <View style={styles.menuItem}>
+            <FaTachometerAlt style={styles.icon} />
+            <Text style={styles.menuItemText}>Dashboards</Text>
+          </View>
+          <View style={styles.menuItem}>
+            <FaCogs style={styles.icon} />
+            <Text style={styles.menuItemText}>Máquinas</Text>
+          </View>
+          <View style={styles.menuItem}>
+            <FaWrench style={styles.icon} />
+            <Text style={styles.menuItemText}>Manutenções</Text>
+          </View>
+          <View style={styles.menuItem}>
+            <FaWarehouse style={styles.icon} />
+            <Text style={styles.menuItemText}>Estoque</Text>
+          </View>
+          <View style={styles.menuItem}>
+            <FaUsers style={styles.icon} />
+            <Text style={styles.menuItemText}>Equipes</Text>
+          </View>
         </View>
-        <View style={styles.menuItem}>
-          <Ionicons name="settings-outline" size={24} color="white" />
-          <Text style={styles.menuText}>Máquinas</Text>
+        <View style={styles.exitButton}>
+          <IoExit style={styles.exitIcon} />
         </View>
-        <View style={styles.menuItem}>
-          <Ionicons name="build-outline" size={24} color="white" />
-          <Text style={styles.menuText}>Manutenções</Text>
-        </View>
-        <View style={styles.menuItem}>
-          <Ionicons name="cube-outline" size={24} color="white" />
-          <Text style={styles.menuText}>Estoque</Text>
-        </View>
-        <View style={styles.menuItem}>
-          <Ionicons name="people-outline" size={24} color="white" />
-          <Text style={styles.menuText}>Equipes</Text>
-        </View>
-        <Ionicons name="log-out-outline" size={40} color="white" style={styles.logoutIcon} />
       </View>
 
       {/* Conteúdo Principal */}
@@ -63,8 +78,8 @@ const StockScreen = () => {
             style={styles.input}
             placeholder="Quantidade"
             keyboardType="numeric"
-            value={newTool.quantity.toString()}
-            onChangeText={(text) => setNewTool({ ...newTool, quantity: parseInt(text) })}
+            value={quantity > 0 ? quantity.toString() : ''}
+            onChangeText={(text) => setQuantity(parseInt(text) || 0)}
           />
           <TextInput
             style={styles.input}
@@ -99,63 +114,80 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   sidebar: {
-    width: 250,
-    backgroundColor: '#1F2937',
-    padding: 16,
+    width: 200,
+    backgroundColor: '#1c1c1c',
+    padding: 20,
     alignItems: 'center',
   },
-  username: {
-    color: 'white',
+  sidebarTitle: {
+    color: '#fff',
     fontSize: 18,
-    marginBottom: 16,
+    marginBottom: 20,
+  },
+  menu: {
+    flex: 1,
+    width: '100%',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    paddingVertical: 10,
+    paddingLeft: 10,
+    backgroundColor: '#333',
+    marginBottom: 10,
+    borderRadius: 5,
   },
-  menuText: {
-    color: 'white',
-    marginLeft: 8,
+  menuItemText: {
+    color: '#fff',
+    marginLeft: 10,
   },
-  logoutIcon: {
+  icon: {
+    color: '#fff',
+    fontSize: 20,
+  },
+  exitButton: {
     marginTop: 'auto',
-    marginBottom: 16,
+    marginBottom: 10,
+  },
+  exitIcon: {
+    color: '#fff',
+    fontSize: 40,
   },
   content: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#E5E7EB',
+    padding: 20,
+    backgroundColor: '#6a1b9a',
   },
   title: {
+    color: '#fff',
     fontSize: 24,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   form: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
   },
   formTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   input: {
-    borderWidth: 1,
+    height: 40,
     borderColor: '#ccc',
-    borderRadius: 4,
-    padding: 8,
-    marginBottom: 12,
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
   row: {
     flexDirection: 'row',
-    padding: 12,
+    padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
   },
   cell: {
     flex: 1,

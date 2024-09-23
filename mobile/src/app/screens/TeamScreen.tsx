@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, ScrollView, StyleSheet, TouchableOpacity
 import { IoExit } from 'react-icons/io5';
 import { FaTachometerAlt, FaCogs, FaWrench, FaWarehouse, FaUsers } from 'react-icons/fa';
 
-export default function Teams() {
+const TeamsScreen = () => {
   const [teams, setTeams] = useState<{ name: string; leader: string; members: number; status: string }[]>([]);
   const [newTeam, setNewTeam] = useState({ name: '', leader: '', members: 0, status: 'Ativa' });
 
@@ -104,7 +104,7 @@ export default function Teams() {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -193,3 +193,5 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+export default TeamsScreen;

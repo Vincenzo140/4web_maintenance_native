@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres
+    hostname: postgres
+    environment:
+      POSTGRES_USER: authapi
+      POSTGRES_PASSWORD: authapi
+      POSTGRES_DB: authapi
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: ./src/Infrastructure/Docker/Dockerfile
+    ports:
+      - "3000:8080"
+    depends_on:
+      - db
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:

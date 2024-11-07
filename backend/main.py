@@ -4,9 +4,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import date
 import redis
-import os 
 from logger import AppLogger
-
 
 logger = AppLogger().get_logger()
 # Configurando Redis
@@ -59,11 +57,11 @@ class PostPartsOfReposition(BaseModel):
 
 class EntryPartsOnStock(BaseModel):
     quantity: int
-    entry_date: date
+    entry_date: date = date.today()
 
 class RegisterBackOffParts(BaseModel):
     quantity: int
-    exit_date: date
+    exit_date: date = date.today()
 
 class ViewPartsOnStock(BaseModel):
     filters: Optional[str]
@@ -78,7 +76,7 @@ class RegisterTeamMembers(BaseModel):
     specialites: List[str]
 
 class AssignTeamToMaintenance(BaseModel):
-    Maintenance_id: int
+    maintenance_id: int
 
 class ManageTeamsAvailability(BaseModel):
     member_id: int
@@ -113,9 +111,8 @@ def machine_register(machine_create: Machines) -> Machines:
     
     # Salvando os dados da máquina
     machine_data = machine_create.dict()
-    machine_data['manufacture_date'] = machine_data['manufacture_date'].isoformat()
     machine_data_json = json.dumps(machine_data)
-    redis_client.hset(machine_id, "machine_data", machine_data_json)
+    redis_client.set(machine_id, machine_data_json)
     redis_client.sadd("machines_list", machine_id)
     
     return machine_create
@@ -127,17 +124,17 @@ def get_machines() -> List[Machines]:
     machine_keys = redis_client.smembers("machines_list")
     machines = []
     for key in machine_keys:
-        machine_data = redis_client.hget(key, "machine_data")
+        machine_data = redis_client.get(key)
         if machine_data:
             machines.append(Machines(**json.loads(machine_data.decode('utf-8'))))
     return machines
 
-# Endpoint para obter uma máquina específica pelo nome
-@app.get("/machines/{serial_number}", tags=["Machine Manage"] , response_model=Machines)
+# Endpoint para obter uma máquina específica pelo número de série
+@app.get("/machines/{serial_number}", tags=["Machine Manage"], response_model=Machines)
 def get_machine(serial_number: str) -> Machines:
     logger.info(f"Obtendo máquina com número de série: {serial_number}")
     machine_id = f"machine:{serial_number}"
-    machine_data = redis_client.hget(machine_id, "machine_data")
+    machine_data = redis_client.get(machine_id)
     if not machine_data:
         raise HTTPException(status_code=404, detail="Máquina não encontrada")
     return Machines(**json.loads(machine_data.decode('utf-8')))
@@ -147,15 +144,14 @@ def get_machine(serial_number: str) -> Machines:
 def update_machine(serial_number: str, machine_update: Machines) -> Machines:
     logger.info(f"Atualizando dados da máquina com número de série: {serial_number}")
     machine_id = f"machine:{serial_number}"
-    machine_data = redis_client.hget(machine_id, "machine_data")
+    machine_data = redis_client.get(machine_id)
     if not machine_data:
         raise HTTPException(status_code=404, detail="Máquina não encontrada")
     machine_data = json.loads(machine_data.decode('utf-8'))
     machine_data.update(machine_update.dict())
-    machine_data['manufacture_data'] = machine_data['manufacture_data'].isoformat()
     machine_data_json = json.dumps(machine_data)
 
-    redis_client.hset(machine_id, "machine_data", machine_data_json)
+    redis_client.set(machine_id, machine_data_json)
     return Machines(**machine_data)
 
 # Endpoint para remover uma máquina
@@ -163,7 +159,7 @@ def update_machine(serial_number: str, machine_update: Machines) -> Machines:
 def delete_machine(serial_number: str):
     logger.info(f"Removendo máquina com número de série: {serial_number}")
     machine_id = f"machine:{serial_number}"
-    machine_data = redis_client.hget(machine_id, "machine_data")
+    machine_data = redis_client.get(machine_id)
     if not machine_data:
         raise HTTPException(status_code=404, detail="Máquina não encontrada")
     redis_client.srem("machines_list", machine_id)
@@ -174,21 +170,149 @@ def delete_machine(serial_number: str):
 # Endpoint para registrar uma nova manutenção
 @app.post("/maintenance", tags=["Maintenance Manage"], status_code=status.HTTP_201_CREATED, response_model=Maintenance)
 def maintenance_register(maintenance_create: Maintenance) -> Maintenance:
-    logger.info("Criando uma nova manuntenção")
+    logger.info("Criando uma nova manutenção")
 
     maintenance_id = f"maintenance:{maintenance_create.maintenance_register_id}"
     
     if redis_client.exists(maintenance_id):
-        raise HTTPException(status_code=400, detail="Máquina já registrada.")
+        raise HTTPException(status_code=400, detail="Manutenção já registrada.")
     
     maintenance_data = maintenance_create.dict()
     maintenance_data['request_date'] = maintenance_data['request_date'].isoformat()
     maintenance_data_json = json.dumps(maintenance_data)
-    redis_client.hset(maintenance_id, "maintenance_data", maintenance_data_json)
+    redis_client.set(maintenance_id, maintenance_data_json)
     redis_client.sadd("maintenance_list", maintenance_id)
     
     return maintenance_create
+
+# Endpoint para obter todas as manutenções registradas, com possibilidade de filtrar por máquina
+@app.get("/maintenance", tags=["Maintenance Manage"], response_model=List[Maintenance])
+def get_maintenance(machine_id: Optional[str] = None) -> List[Maintenance]:
+    logger.info("Obtendo todas as manutenções")
+    maintenance_keys = redis_client.smembers("maintenance_list")
+    maintenance = []
+    for key in maintenance_keys:
+        maintenance_data = redis_client.get(key)
+        if maintenance_data:
+            maintenance_obj = Maintenance(**json.loads(maintenance_data.decode('utf-8')))
+            if machine_id is None or maintenance_obj.machine_id == machine_id:
+                maintenance.append(maintenance_obj)
+    return maintenance
+
+# Endpoint para obter uma manutenção específica pelo número de registro
+@app.get("/maintenance/{maintenance_register_id}", tags=["Maintenance Manage"], response_model=Maintenance)
+def get_maintenance_by_id(maintenance_register_id: str) -> Maintenance:
+    logger.info(f"Obtendo manutenção com número de registro: {maintenance_register_id}")
+    maintenance_id = f"maintenance:{maintenance_register_id}"
+    maintenance_data = redis_client.get(maintenance_id)
+    if not maintenance_data:
+        raise HTTPException(status_code=404, detail="Manutenção não encontrada")
+    return Maintenance(**json.loads(maintenance_data.decode('utf-8')))
+
+# Endpoint para atualizar dados de uma manutenção
+@app.put("/maintenance/{maintenance_register_id}", tags=["Maintenance Manage"], status_code=status.HTTP_202_ACCEPTED, response_model=Maintenance)
+def update_maintenance(maintenance_register_id: str, maintenance_update: Maintenance) -> Maintenance:
+    logger.info(f"Atualizando dados da manutenção com número de registro: {maintenance_register_id}")
+    maintenance_id = f"maintenance:{maintenance_register_id}"
+    maintenance_data = redis_client.get(maintenance_id)
+    if not maintenance_data:
+        raise HTTPException(status_code=404, detail="Manutenção não encontrada")
+    maintenance_data = json.loads(maintenance_data.decode('utf-8'))
     
+    maintenance_data.update(maintenance_update.dict())
+    maintenance_data['request_date'] = maintenance_data['request_date'].isoformat()
+    maintenance_data_json = json.dumps(maintenance_data)
+    
+    redis_client.set(maintenance_id, maintenance_data_json)
+    return Maintenance(**maintenance_data)
+
+# Endpoint para remover uma manutenção
+@app.delete("/maintenance/{maintenance_register_id}", tags=["Maintenance Manage"], status_code=status.HTTP_204_NO_CONTENT)
+def delete_maintenance(maintenance_register_id: str):
+    logger.info(f"Removendo manutenção com número de registro: {maintenance_register_id}")
+    maintenance_id = f"maintenance:{maintenance_register_id}"
+    maintenance_data = redis_client.get(maintenance_id)
+    if not maintenance_data:
+        raise HTTPException(status_code=404, detail="Manutenção não encontrada")
+    redis_client.srem("maintenance_list", maintenance_id)
+    redis_client.delete(maintenance_id)
+    
+    return None
+
+# Endpoint para registrar uma nova parte de reposição
+@app.post("/parts", tags=["Parts Manager"], response_model=PostPartsOfReposition, status_code=status.HTTP_201_CREATED)
+def post_parts_of_reposition(parts_of_reposition: PostPartsOfReposition) -> PostPartsOfReposition:
+    logger.info("Criando uma nova parte de reposição")
+    parts_of_reposition_id = f"parts:{parts_of_reposition.code}"
+    
+    if redis_client.exists(parts_of_reposition_id):
+        raise HTTPException(status_code=400, detail="Parte já registrada.")
+    
+    parts_of_reposition_data = parts_of_reposition.dict()
+    parts_of_reposition_data_json = json.dumps(parts_of_reposition_data)
+    redis_client.set(parts_of_reposition_id, parts_of_reposition_data_json)
+    redis_client.sadd("parts_list", parts_of_reposition_id)
+    
+    return parts_of_reposition
+
+# Endpoint para registrar entrada de partes no estoque
+@app.post("/parts/{code}/entry", tags=["Parts Manager"], status_code=status.HTTP_201_CREATED, response_model=EntryPartsOnStock)
+def entry_parts_on_stock(code: str, entry_parts_on_stock: EntryPartsOnStock) -> EntryPartsOnStock:
+    logger.info(f"Registrando entrada de parte com código: {code}")
+    
+    parts_of_reposition_id = f"parts:{code}"
+    
+    parts_of_reposition_data = redis_client.get(parts_of_reposition_id)
+    if not parts_of_reposition_data:
+        raise HTTPException(status_code=404, detail="Parte não encontrada")
+    parts_of_reposition_data = json.loads(parts_of_reposition_data.decode('utf-8'))
+    
+    entry_parts_on_stock_data = entry_parts_on_stock.dict()
+    entry_parts_on_stock_data_json = json.dumps(entry_parts_on_stock_data)
+    redis_client.set(parts_of_reposition_id, entry_parts_on_stock_data_json)
+    
+    return entry_parts_on_stock
+
+# Endpoint para registrar saída de partes no estoque
+@app.post("/parts/{code}/exit", tags=["Parts Manager"], status_code=status.HTTP_201_CREATED, response_model=RegisterBackOffParts)
+def exit_parts_on_stock(code: str, register_back_off_parts: RegisterBackOffParts) -> RegisterBackOffParts:
+    logger.info(f"Register back off parts with code: {code}")
+    
+    parts_of_reposition_id = f"parts:{code}"
+    
+    parts_of_reposition_data = redis_client.get(parts_of_reposition_id)
+    if not parts_of_reposition_data:
+        raise HTTPException(status_code=404, detail="Parte não encontrada")
+    parts_of_reposition_data = json.loads(parts_of_reposition_data.decode('utf-8'))
+    
+    register_back_off_parts_data = register_back_off_parts.dict()
+    register_back_off_parts_data_json = json.dumps(register_back_off_parts_data)
+    redis_client.set(parts_of_reposition_id, register_back_off_parts_data_json)
+    
+    return register_back_off_parts
+
+# Endpoint para obter todas as partes registradas
+@app.get("/parts", tags=["Parts Manager"], response_model=List[PostPartsOfReposition])
+def get_parts_of_reposition() -> List[PostPartsOfReposition]:
+    logger.info("Obtendo todas as partes de reposição")
+    parts_of_reposition_keys = redis_client.smembers("parts_list")
+    parts_of_reposition = []
+    for key in parts_of_reposition_keys:
+        parts_of_reposition_data = redis_client.get(key)
+        if parts_of_reposition_data:
+            parts_of_reposition.append(PostPartsOfReposition(**json.loads(parts_of_reposition_data.decode('utf-8'))))
+    return parts_of_reposition
+
+# Endpoint para obter uma parte de reposição específica pelo código
+@app.get("/parts/{code}", tags=["Parts Manager"], response_model=PostPartsOfReposition)
+def get_parts_of_reposition_by_code(code: str) -> PostPartsOfReposition:
+    logger.info(f"Obtendo parte de reposição com código: {code}")
+    parts_of_reposition_id = f"parts:{code}"
+    parts_of_reposition_data = redis_client.get(parts_of_reposition_id)
+    if not parts_of_reposition_data:
+        raise HTTPException(status_code=404, detail="Parte não encontrada")
+    return PostPartsOfReposition(**json.loads(parts_of_reposition_data.decode('utf-8')))
+
 # Inicializando o servidor
 if __name__ == "__main__":
     import uvicorn

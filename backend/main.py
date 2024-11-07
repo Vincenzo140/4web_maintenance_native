@@ -24,6 +24,7 @@ class Machines(BaseModel):
     maintenance_history: List[str]
 
 class Maintenance(BaseModel):
+    maintenance_register_id: int
     problem_description: str
     request_date: date
     priority: str
@@ -113,7 +114,7 @@ def machine_register(machine_create: Machines) -> Machines:
     
     # Salvando os dados da máquina
     machine_data = machine_create.dict()
-    machine_data['manufacture_data'] = machine_data['manufacture_data'].isoformat()
+    machine_data['manufacture_date'] = machine_data['manufacture_date'].isoformat()
     machine_data_json = json.dumps(machine_data)
     redis_client.hset(machine_id, "machine_data", machine_data_json)
     redis_client.sadd("machines_list", machine_id)
@@ -158,6 +159,37 @@ def update_machine(serial_number: str, machine_update: Machines) -> Machines:
     redis_client.hset(machine_id, "machine_data", machine_data_json)
     return Machines(**machine_data)
 
+# Endpoint para remover uma máquina
+@app.delete("/machines/{serial_number}", tags=["Machine Manage"], status_code=status.HTTP_204_NO_CONTENT)
+def delete_machine(serial_number: str):
+    logger.info(f"Removendo máquina com número de série: {serial_number}")
+    machine_id = f"machine:{serial_number}"
+    machine_data = redis_client.hget(machine_id, "machine_data")
+    if not machine_data:
+        raise HTTPException(status_code=404, detail="Máquina não encontrada")
+    redis_client.srem("machines_list", machine_id)
+    redis_client.delete(machine_id)
+    
+    return None
+
+# Endpoint para registrar uma nova manutenção
+@app.post("/maintenance", tags=["Maintenance Manage"], status_code=status.HTTP_201_CREATED, response_model=Maintenance)
+def maintenance_register(maintenance_create: Maintenance) -> Maintenance:
+    logger.info("Criando uma nova manuntenção")
+
+    maintenance_id = f"maintenance:{maintenance_create.maintenance_register_id}"
+    
+    if redis_client.exists(maintenance_id):
+        raise HTTPException(status_code=400, detail="Máquina já registrada.")
+    
+    maintenance_data = maintenance_create.dict()
+    maintenance_data['request_date'] = maintenance_data['request_date'].isoformat()
+    maintenance_data_json = json.dumps(maintenance_data)
+    redis_client.hset(maintenance_id, "maintenance_data", maintenance_data_json)
+    redis_client.sadd("maintenance_list", maintenance_id)
+    
+    return maintenance_create
+    
 # Inicializando o servidor
 if __name__ == "__main__":
     import uvicorn

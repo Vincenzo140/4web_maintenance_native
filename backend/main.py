@@ -313,6 +313,71 @@ def get_parts_of_reposition_by_code(code: str) -> PostPartsOfReposition:
         raise HTTPException(status_code=404, detail="Parte não encontrada")
     return PostPartsOfReposition(**json.loads(parts_of_reposition_data.decode('utf-8')))
 
+# Endpoint para registrar uma nova equipe de manutenção
+@app.post("/teams", tags=["Teams Manager"], response_model=RegisterTeamsOnMaintenance, status_code=status.HTTP_201_CREATED)
+def register_teams_on_maintenance(register_teams_on_maintenance: RegisterTeamsOnMaintenance) -> RegisterTeamsOnMaintenance:
+    logger.info("Registrando nova equipe de manutenção")
+    team_id = f"team:{register_teams_on_maintenance.name}"
+    
+    if redis_client.exists(team_id):
+        raise HTTPException(status_code=400, detail="Equipe já registrada.")
+    
+    team_data = register_teams_on_maintenance.dict()
+    team_data_json = json.dumps(team_data)
+    redis_client.set(team_id, team_data_json)
+    redis_client.sadd("teams_list", team_id)
+    
+    return register_teams_on_maintenance
+
+# Endpoint para obter todas as equipes registradas
+@app.get("/teams", tags=["Teams Manager"], response_model=List[RegisterTeamsOnMaintenance])
+def get_teams() -> List[RegisterTeamsOnMaintenance]:
+    logger.info("Obtendo todas as equipes de manutenção")
+    team_keys = redis_client.smembers("teams_list")
+    teams = []
+    for key in team_keys:
+        team_data = redis_client.get(key)
+        if team_data:
+            teams.append(RegisterTeamsOnMaintenance(**json.loads(team_data.decode('utf-8'))))
+    return teams
+
+# Endpoint para obter uma equipe específica pelo nome
+@app.get("/teams/{team_name}", tags=["Teams Manager"], response_model=RegisterTeamsOnMaintenance)
+def get_team_by_name(team_name: str) -> RegisterTeamsOnMaintenance:
+    logger.info(f"Obtendo equipe com nome: {team_name}")
+    team_id = f"team:{team_name}"
+    team_data = redis_client.get(team_id)
+    if not team_data:
+        raise HTTPException(status_code=404, detail="Equipe não encontrada")
+    return RegisterTeamsOnMaintenance(**json.loads(team_data.decode('utf-8')))
+
+# Endpoint para atualizar dados de uma equipe
+@app.put("/teams/{team_name}", tags=["Teams Manager"], status_code=status.HTTP_202_ACCEPTED, response_model=RegisterTeamsOnMaintenance)
+def update_team(team_name: str, team_update: RegisterTeamsOnMaintenance) -> RegisterTeamsOnMaintenance:
+    logger.info(f"Atualizando dados da equipe com nome: {team_name}")
+    team_id = f"team:{team_name}"
+    team_data = redis_client.get(team_id)
+    if not team_data:
+        raise HTTPException(status_code=404, detail="Equipe não encontrada")
+    team_data = json.loads(team_data.decode('utf-8'))
+    team_data.update(team_update.dict())
+    team_data_json = json.dumps(team_data)
+    redis_client.set(team_id, team_data_json)
+    return RegisterTeamsOnMaintenance(**team_data)
+
+# Endpoint para remover uma equipe
+@app.delete("/teams/{team_name}", tags=["Teams Manager"], status_code=status.HTTP_204_NO_CONTENT)
+def delete_team(team_name: str):
+    logger.info(f"Removendo equipe com nome: {team_name}")
+    team_id = f"team:{team_name}"
+    team_data = redis_client.get(team_id)
+    if not team_data:
+        raise HTTPException(status_code=404, detail="Equipe não encontrada")
+    redis_client.srem("teams_list", team_id)
+    redis_client.delete(team_id)
+    
+    return None
+
 # Inicializando o servidor
 if __name__ == "__main__":
     import uvicorn

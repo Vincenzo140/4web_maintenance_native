@@ -2,16 +2,15 @@ import json
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from typing import Optional, List
-import logging as logger
 from datetime import date
 import redis
+import os 
+from logger import AppLogger
 
+
+logger = AppLogger().get_logger()
 # Configurando Redis
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
-
-# Configurando logger
-logger.basicConfig(level=logger.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger.getLogger(__name__)
 
 # Definindo modelos de dados
 class Machines(BaseModel):

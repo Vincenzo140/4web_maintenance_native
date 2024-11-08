@@ -5,6 +5,9 @@ from typing import Optional, List
 from datetime import date
 import redis
 from logger import AppLogger
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 logger = AppLogger().get_logger()
 # Configurando Redis
@@ -96,6 +99,14 @@ class ManageUsersPermissions(BaseModel):
 
 # Inicializando a aplicação FastAPI
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Endpoint para registrar uma nova máquina
 @app.post("/machines", tags=["Machine Manage"], status_code=status.HTTP_201_CREATED, response_model=Machines)

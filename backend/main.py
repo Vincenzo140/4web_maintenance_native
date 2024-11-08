@@ -5,7 +5,7 @@ from typing import Optional, List
 from datetime import date
 import redis
 from logger import AppLogger
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware  
 
 
 
@@ -121,7 +121,9 @@ def machine_register(machine_create: Machines) -> Machines:
         raise HTTPException(status_code=400, detail="Máquina já registrada.")
     
     # Salvando os dados da máquina
+
     machine_data = machine_create.dict()
+    machine_data['manufacture_data'] = machine_data['manufacture_data'].isoformat()
     machine_data_json = json.dumps(machine_data)
     redis_client.set(machine_id, machine_data_json)
     redis_client.sadd("machines_list", machine_id)
@@ -279,6 +281,7 @@ def entry_parts_on_stock(code: str, entry_parts_on_stock: EntryPartsOnStock) -> 
     parts_of_reposition_data = json.loads(parts_of_reposition_data.decode('utf-8'))
     
     entry_parts_on_stock_data = entry_parts_on_stock.dict()
+    entry_parts_on_stock_data['entry_date'] = entry_parts_on_stock_data['entry_date'].isoformat()
     entry_parts_on_stock_data_json = json.dumps(entry_parts_on_stock_data)
     redis_client.set(parts_of_reposition_id, entry_parts_on_stock_data_json)
     
@@ -297,6 +300,7 @@ def exit_parts_on_stock(code: str, register_back_off_parts: RegisterBackOffParts
     parts_of_reposition_data = json.loads(parts_of_reposition_data.decode('utf-8'))
     
     register_back_off_parts_data = register_back_off_parts.dict()
+    register_back_off_parts_data['exit_date'] = register_back_off_parts_data['exit_date'].isoformat()
     register_back_off_parts_data_json = json.dumps(register_back_off_parts_data)
     redis_client.set(parts_of_reposition_id, register_back_off_parts_data_json)
     
@@ -372,6 +376,7 @@ def update_team(team_name: str, team_update: RegisterTeamsOnMaintenance) -> Regi
         raise HTTPException(status_code=404, detail="Equipe não encontrada")
     team_data = json.loads(team_data.decode('utf-8'))
     team_data.update(team_update.dict())
+    team_data['']
     team_data_json = json.dumps(team_data)
     redis_client.set(team_id, team_data_json)
     return RegisterTeamsOnMaintenance(**team_data)

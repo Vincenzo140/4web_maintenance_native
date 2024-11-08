@@ -1,9 +1,10 @@
 import pytest
 import requests
-from datetime import date, timedelta
+from datetime import date, timedelta, time
 import random
 
-BASE_URL = "http://localhost:8000"
+HOST = "0.0.0.0"
+PORT = 8000
 
 # Gerar uma lista de máquinas para popular o banco de dados
 def generate_machine_data():
@@ -35,29 +36,29 @@ def generate_team_data():
         "members": [random.randint(1, 1000) for _ in range(random.randint(2, 5))]
     }
 
-# Teste de integração para popular o banco de dados
+# para popular o banco de dados
 def test_populate_database():
     # Registrar máquinas
     for _ in range(10):  # Registrar 10 máquinas
         machine_data = generate_machine_data()
-        response = requests.post(f"{BASE_URL}/machines", json=machine_data)
+        response = requests.post(f"http://{HOST}:{PORT}/machines", json=machine_data)
         assert response.status_code == 201, f"Falha ao registrar máquina: {response.text}"
 
     # Registrar partes de reposição
     for _ in range(10):  # Registrar 10 partes de reposição
         part_data = generate_part_data()
-        response = requests.post(f"{BASE_URL}/parts", json=part_data)
+        response = requests.post(f"http://{HOST}:{PORT}/parts", json=part_data)
         assert response.status_code == 201, f"Falha ao registrar parte de reposição: {response.text}"
 
     # Registrar equipes de manutenção
     for _ in range(5):  # Registrar 5 equipes de manutenção
         team_data = generate_team_data()
-        response = requests.post(f"{BASE_URL}/teams", json=team_data)
+        response = requests.post(f"http://{HOST}:{PORT}/teams", json=team_data)
         assert response.status_code == 201, f"Falha ao registrar equipe: {response.text}"
 
 # Teste para obter todas as máquinas
 def test_get_machines():
-    response = requests.get(f"{BASE_URL}/machines")
+    response = requests.get(f"http://{HOST}:{PORT}/machines")
     assert response.status_code == 200, "Falha ao obter máquinas"
     machines = response.json()
     assert isinstance(machines, list), "O formato da resposta não é uma lista"
@@ -65,7 +66,7 @@ def test_get_machines():
 
 # Teste para obter todas as partes de reposição
 def test_get_parts():
-    response = requests.get(f"{BASE_URL}/parts")
+    response = requests.get(f"http://{HOST}:{PORT}/parts")
     assert response.status_code == 200, "Falha ao obter partes de reposição"
     parts = response.json()
     assert isinstance(parts, list), "O formato da resposta não é uma lista"
@@ -73,7 +74,7 @@ def test_get_parts():
 
 # Teste para obter todas as equipes de manutenção
 def test_get_teams():
-    response = requests.get(f"{BASE_URL}/teams")
+    response = requests.get(f"http://{HOST}:{PORT}/teams")
     assert response.status_code == 200, "Falha ao obter equipes de manutenção"
     teams = response.json()
     assert isinstance(teams, list), "O formato da resposta não é uma lista"

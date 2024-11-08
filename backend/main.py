@@ -122,7 +122,7 @@ def machine_register(machine_create: Machines) -> Machines:
     
     # Salvando os dados da máquina
 
-    machine_data = machine_create.dict()
+    machine_data = machine_create.model_dump()
     machine_data['manufacture_data'] = machine_data['manufacture_data'].isoformat()
     machine_data_json = json.dumps(machine_data)
     redis_client.set(machine_id, machine_data_json)
@@ -161,7 +161,7 @@ def update_machine(serial_number: str, machine_update: Machines) -> Machines:
     if not machine_data:
         raise HTTPException(status_code=404, detail="Máquina não encontrada")
     machine_data = json.loads(machine_data.decode('utf-8'))
-    machine_data.update(machine_update.dict())
+    machine_data.update(machine_update.model_dump())
     machine_data_json = json.dumps(machine_data)
 
     redis_client.set(machine_id, machine_data_json)
@@ -190,7 +190,7 @@ def maintenance_register(maintenance_create: Maintenance) -> Maintenance:
     if redis_client.exists(maintenance_id):
         raise HTTPException(status_code=400, detail="Manutenção já registrada.")
     
-    maintenance_data = maintenance_create.dict()
+    maintenance_data = maintenance_create.model_dump()
     maintenance_data['request_date'] = maintenance_data['request_date'].isoformat()
     maintenance_data_json = json.dumps(maintenance_data)
     redis_client.set(maintenance_id, maintenance_data_json)
@@ -232,7 +232,7 @@ def update_maintenance(maintenance_register_id: str, maintenance_update: Mainten
         raise HTTPException(status_code=404, detail="Manutenção não encontrada")
     maintenance_data = json.loads(maintenance_data.decode('utf-8'))
     
-    maintenance_data.update(maintenance_update.dict())
+    maintenance_data.update(maintenance_update.model_dump())
     maintenance_data['request_date'] = maintenance_data['request_date'].isoformat()
     maintenance_data_json = json.dumps(maintenance_data)
     
@@ -261,7 +261,7 @@ def post_parts_of_reposition(parts_of_reposition: PostPartsOfReposition) -> Post
     if redis_client.exists(parts_of_reposition_id):
         raise HTTPException(status_code=400, detail="Parte já registrada.")
     
-    parts_of_reposition_data = parts_of_reposition.dict()
+    parts_of_reposition_data = parts_of_reposition.model_dump()
     parts_of_reposition_data_json = json.dumps(parts_of_reposition_data)
     redis_client.set(parts_of_reposition_id, parts_of_reposition_data_json)
     redis_client.sadd("parts_list", parts_of_reposition_id)
@@ -280,7 +280,7 @@ def entry_parts_on_stock(code: str, entry_parts_on_stock: EntryPartsOnStock) -> 
         raise HTTPException(status_code=404, detail="Parte não encontrada")
     parts_of_reposition_data = json.loads(parts_of_reposition_data.decode('utf-8'))
     
-    entry_parts_on_stock_data = entry_parts_on_stock.dict()
+    entry_parts_on_stock_data = entry_parts_on_stock.model_dump()
     entry_parts_on_stock_data['entry_date'] = entry_parts_on_stock_data['entry_date'].isoformat()
     entry_parts_on_stock_data_json = json.dumps(entry_parts_on_stock_data)
     redis_client.set(parts_of_reposition_id, entry_parts_on_stock_data_json)
@@ -299,7 +299,7 @@ def exit_parts_on_stock(code: str, register_back_off_parts: RegisterBackOffParts
         raise HTTPException(status_code=404, detail="Parte não encontrada")
     parts_of_reposition_data = json.loads(parts_of_reposition_data.decode('utf-8'))
     
-    register_back_off_parts_data = register_back_off_parts.dict()
+    register_back_off_parts_data = register_back_off_parts.model_dump()
     register_back_off_parts_data['exit_date'] = register_back_off_parts_data['exit_date'].isoformat()
     register_back_off_parts_data_json = json.dumps(register_back_off_parts_data)
     redis_client.set(parts_of_reposition_id, register_back_off_parts_data_json)
@@ -337,7 +337,7 @@ def register_teams_on_maintenance(register_teams_on_maintenance: RegisterTeamsOn
     if redis_client.exists(team_id):
         raise HTTPException(status_code=400, detail="Equipe já registrada.")
     
-    team_data = register_teams_on_maintenance.dict()
+    team_data = register_teams_on_maintenance.model_dump()
     team_data_json = json.dumps(team_data)
     redis_client.set(team_id, team_data_json)
     redis_client.sadd("teams_list", team_id)
@@ -375,7 +375,7 @@ def update_team(team_name: str, team_update: RegisterTeamsOnMaintenance) -> Regi
     if not team_data:
         raise HTTPException(status_code=404, detail="Equipe não encontrada")
     team_data = json.loads(team_data.decode('utf-8'))
-    team_data.update(team_update.dict())
+    team_data.update(team_update.model_dump())
     team_data['']
     team_data_json = json.dumps(team_data)
     redis_client.set(team_id, team_data_json)

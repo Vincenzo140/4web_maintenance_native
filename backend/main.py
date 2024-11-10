@@ -82,24 +82,7 @@ class Maintenance(BaseModel):
     status: str
     machine_id: str
 
-class MaintenanceStatus(BaseModel):
-    status: str
-    comments: str
-    related_files: List[str]
 
-class SolicitationMaintenance(BaseModel):
-    team_id: int
-    responsible_member: int
-
-class PartsUsageInMaintenance(BaseModel):
-    part_id: int
-    quantity: int
-    supplier: str
-
-class ListMaintenancePerMachine(BaseModel):
-    machine_id: Optional[int]
-    period: Optional[str]
-    machine_type: Optional[str]
 
 class PostPartsOfReposition(BaseModel):
     name: str
@@ -116,33 +99,16 @@ class RegisterBackOffParts(BaseModel):
     quantity: int
     exit_date: date = date.today()
 
-class ViewPartsOnStock(BaseModel):
-    filters: Optional[str]
 
 class Teams(BaseModel):
     name: str
     members: List[Union[str, int]]
     specialites: List[str]
     
-class AssignTeamToMaintenance(BaseModel):
-    maintenance_id: int
-
-class ManageTeamsAvailability(BaseModel):
-    member_id: int
-    availability_status: str
-
-class CreateUserAccount(BaseModel):
-    username: str
-    password: str
-    role: str
 
 class LoginUser(BaseModel):
     username: str
     password: str
-
-class ManageUsersPermissions(BaseModel):
-    permissions: List[str]
-
 
 # Definindo modelos de dados
 class CreateUserAccount(BaseModel):

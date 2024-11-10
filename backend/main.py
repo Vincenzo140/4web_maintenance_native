@@ -773,55 +773,97 @@ def delete_team(team_name: str, redis_client: redis.Redis = Depends(get_redis_cl
     return None
 # Endpoint para criar um novo usuário
 @app.post("/users", tags=["User Management"], status_code=status.HTTP_201_CREATED, response_model=CreateUserAccount)
-def create_user(user: CreateUserAccount) -> CreateUserAccount:
+def create_user(user: CreateUserAccount, redis_client: redis.Redis = Depends(get_redis_client)) -> CreateUserAccount:
     logger.info(f"Criando novo usuário: {user.username}")
     user_id = f"user:{user.username}"
-    
-    # Verificando se o usuário já existe
-    if redis_client.exists(user_id):
-        raise HTTPException(status_code=400, detail="Usuário já registrado.")
-    
-    # Criptografando a senha e salvando os dados do usuário
-    user_data = user.dict()
-    user_data["password"] = get_password_hash(user.password)
-    user_data_json = json.dumps(user_data)
-    redis_client.set(user_id, user_data_json)
-    redis_client.sadd("users_list", user_id)
-    
+
+    try:
+        # Verificando se o usuário já existe
+        if redis_client.exists(user_id):
+            raise HTTPException(status_code=400, detail="Usuário já registrado.")
+
+        # Criptografando a senha e salvando os dados do usuário
+        user_data = user.dict()
+        user_data["password"] = get_password_hash(user.password)
+        user_data_json = json.dumps(user_data)
+        redis_client.set(user_id, user_data_json)
+        redis_client.sadd("users_list", user_id)
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
+
     return user
 
 # Endpoint para fazer login e obter o token de acesso
 @app.post("/token", tags=["User Management"], response_model=Token)
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuário ou senha incorretos",
-            headers={"WWW-Authenticate": "Bearer"},
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), redis_client: redis.Redis = Depends(get_redis_client)) -> Token:
+    logger.info(f"Usuário tentando fazer login: {form_data.username}")
+    user_id = f"user:{form_data.username}"
+
+    try:
+        user_data = redis_client.get(user_id)
+        if not user_data:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Usuário ou senha incorretos",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        try:
+            user = json.loads(user_data.decode('utf-8'))
+            if not isinstance(user, dict):
+                raise ValueError(f"Formato inválido de dados: {user}")
+
+            if not verify_password(form_data.password, user["password"]):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Usuário ou senha incorretos",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados do usuário: {str(e)}")
+
+        # Gerar o token de acesso
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user["username"]}, expires_delta=access_token_expires
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user["username"]}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
 # Endpoint para gerenciar permissões de usuário
 @app.put("/users/{username}/permissions", tags=["User Management"], status_code=status.HTTP_202_ACCEPTED, response_model=ManageUsersPermissions)
-def manage_user_permissions(username: str, permissions: ManageUsersPermissions, current_user: dict = Depends(get_current_user)) -> ManageUsersPermissions:
+def manage_user_permissions(username: str, permissions: ManageUsersPermissions, redis_client: redis.Redis = Depends(get_redis_client), current_user: dict = Depends(get_current_user)) -> ManageUsersPermissions:
     logger.info(f"Gerenciando permissões para o usuário: {username}")
     user_id = f"user:{username}"
-    user_data = redis_client.get(user_id)
-    if not user_data:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    user_data = json.loads(user_data.decode('utf-8'))
-    
-    # Atualizando permissões do usuário
-    user_data['permissions'] = permissions.permissions
-    user_data_json = json.dumps(user_data)
-    redis_client.set(user_id, user_data_json)
-    
-    return permissions
+
+    try:
+        # Buscar os dados do usuário no Redis
+        user_data = redis_client.get(user_id)
+        if not user_data:
+            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+        # Decodificar os dados do usuário
+        try:
+            user_data_dict = json.loads(user_data.decode('utf-8'))
+            if not isinstance(user_data_dict, dict):
+                raise ValueError(f"Formato inválido de dados: {user_data_dict}")
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados do usuário: {str(e)}")
+
+        # Atualizar as permissões do usuário
+        user_data_dict['permissions'] = permissions.permissions
+        user_data_json = json.dumps(user_data_dict)
+        redis_client.set(user_id, user_data_json)
+
+        return permissions
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
 # Inicializando o servidor
 if __name__ == "__main__":

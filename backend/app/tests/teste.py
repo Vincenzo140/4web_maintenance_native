@@ -1,84 +1,155 @@
 import pytest
 import requests
-from datetime import date, timedelta, time
-import random
+from multiprocessing import Pool
+import time
 
-HOST = "0.0.0.0"
-PORT = 8000
+# URL base do servidor
+BASE_URL = "http://localhost:8000"
 
-# Gerar uma lista de máquinas para popular o banco de dados
-def generate_machine_data():
-    random_date = date.today() - timedelta(days=random.randint(1, 365))
-    return {
-        "name": f"Machine_{random.randint(1, 10000)}",
-        "type": "Indústria",
-        "model": f"Model_{random.randint(1, 100)}",
-        "manufacture_data": str(random_date),
-        "serial_number": f"SN_{random.randint(1000, 9999)}",
-        "location": f"Sector_{random.randint(1, 10)}",
-        "maintenance_history": []
+# Função para criar uma nova máquina (POST /machines)
+def create_machine():
+    machine_data = {
+        "name": "Maquina Teste",
+        "type": "Industrial",
+        "model": "Mod-XYZ",
+        "manufacture_data": "2022-01-01",
+        "serial_number": "SN-123456",
+        "location": "Linha de produção A",
+        "maintenance_history": ["Substituição de motor em 2023"],
+        "status": "operando"
     }
+    response = requests.post(f"{BASE_URL}/machines", json=machine_data)
+    return response
 
-# Gerar uma lista de partes de reposição para popular o banco de dados
-def generate_part_data():
-    return {
-        "name": f"Part_{random.randint(1, 10000)}",
-        "code": f"Code_{random.randint(1000, 9999)}",
-        "supplier": f"Supplier_{random.randint(1, 100)}",
-        "quantity": random.randint(1, 100),
-        "unit_price": random.uniform(10.0, 500.0)
+# Função para criar uma nova manutenção (POST /maintenance)
+def create_maintenance():
+    maintenance_data = {
+        "maintenance_register_id": 1,
+        "problem_description": "Problema no motor",
+        "request_date": "2024-01-01",
+        "priority": "Alta",
+        "assigned_team": "Equipe A",
+        "status": "Aberto",
+        "machine_id": "SN-123456"
     }
+    response = requests.post(f"{BASE_URL}/maintenance", json=maintenance_data)
+    return response
 
-# Gerar uma lista de equipes para popular o banco de dados
-def generate_team_data():
-    return {
-        "name": f"Team_{random.randint(1, 100)}",
-        "members": [random.randint(1, 1000) for _ in range(random.randint(2, 5))]
+# Função para criar uma nova parte de reposição (POST /parts)
+def create_part():
+    part_data = {
+        "name": "Peça Teste",
+        "code": "P-123456",
+        "supplier": "Fornecedor A",
+        "quantity": 10,
+        "unit_price": 50.0
     }
+    response = requests.post(f"{BASE_URL}/parts", json=part_data)
+    return response
 
-# para popular o banco de dados
-def test_populate_database():
-    # Registrar máquinas
-    for _ in range(10):  # Registrar 10 máquinas
-        machine_data = generate_machine_data()
-        response = requests.post(f"http://{HOST}:{PORT}/machines", json=machine_data)
-        assert response.status_code == 201, f"Falha ao registrar máquina: {response.text}"
+# Função para registrar uma nova equipe de manutenção (POST /teams)
+def create_team():
+    team_data = {
+        "name": "Equipe Teste",
+        "members": [1, 2, 3],
+        "specialites": "Mecânica"
+    }
+    response = requests.post(f"{BASE_URL}/teams", json=team_data)
+    return response
 
-    # Registrar partes de reposição
-    for _ in range(10):  # Registrar 10 partes de reposição
-        part_data = generate_part_data()
-        response = requests.post(f"http://{HOST}:{PORT}/parts", json=part_data)
-        assert response.status_code == 201, f"Falha ao registrar parte de reposição: {response.text}"
+# Testes unitários usando pytest
+@pytest.mark.parametrize("serial_number, status_code", [
+    ("SN-123456", 200),
+    ("SN-000000", 404),
+])
+def test_get_machine(serial_number, status_code):
+    response = requests.get(f"{BASE_URL}/machines/{serial_number}")
+    assert response.status_code == status_code
 
-    # Registrar equipes de manutenção
-    for _ in range(5):  # Registrar 5 equipes de manutenção
-        team_data = generate_team_data()
-        response = requests.post(f"http://{HOST}:{PORT}/teams", json=team_data)
-        assert response.status_code == 201, f"Falha ao registrar equipe: {response.text}"
+# Testes de integração usando pytest
+def test_create_machine():
+    response = create_machine()
+    assert response.status_code == 201
+    assert response.json()["serial_number"] == "SN-123456"
 
-# Teste para obter todas as máquinas
-def test_get_machines():
-    response = requests.get(f"http://{HOST}:{PORT}/machines")
-    assert response.status_code == 200, "Falha ao obter máquinas"
-    machines = response.json()
-    assert isinstance(machines, list), "O formato da resposta não é uma lista"
-    assert len(machines) > 0, "Nenhuma máquina foi encontrada"
+def test_create_maintenance():
+    response = create_maintenance()
+    assert response.status_code == 201
+    assert response.json()["maintenance_register_id"] == 1
 
-# Teste para obter todas as partes de reposição
-def test_get_parts():
-    response = requests.get(f"http://{HOST}:{PORT}/parts")
-    assert response.status_code == 200, "Falha ao obter partes de reposição"
-    parts = response.json()
-    assert isinstance(parts, list), "O formato da resposta não é uma lista"
-    assert len(parts) > 0, "Nenhuma parte de reposição foi encontrada"
+def test_create_part():
+    response = create_part()
+    assert response.status_code == 201
+    assert response.json()["code"] == "P-123456"
 
-# Teste para obter todas as equipes de manutenção
-def test_get_teams():
-    response = requests.get(f"http://{HOST}:{PORT}/teams")
-    assert response.status_code == 200, "Falha ao obter equipes de manutenção"
-    teams = response.json()
-    assert isinstance(teams, list), "O formato da resposta não é uma lista"
-    assert len(teams) > 0, "Nenhuma equipe foi encontrada"
+def test_create_team():
+    response = create_team()
+    assert response.status_code == 201
+    assert response.json()["name"] == "Equipe Teste"
+
+# Teste de carga simples para criar múltiplas máquinas
+def load_test_create_machine(instance):
+    print(f"Criando máquina {instance}")
+    response = create_machine()
+    return response.status_code
+
+def load_test_create_maintenance(instance):
+    print(f"Criando manutenção {instance}")
+    response = create_maintenance()
+    return response.status_code
+
+def load_test_create_part(instance):
+    print(f"Criando parte {instance}")
+    response = create_part()
+    return response.status_code
+
+def load_test_create_team(instance):
+    print(f"Criando equipe {instance}")
+    response = create_team()
+    return response.status_code
+
+# Função de teste de carga para testar os endpoints POST
+# Configurando para criar múltiplas entradas simultaneamente
+def test_load_create_machine():
+    start_time = time.time()
+    with Pool(10) as p:  # Teste com 10 máquinas simultâneas
+        results = p.map(load_test_create_machine, range(10))
+    
+    # Verificando se todos os resultados são 201 (Criado com sucesso)
+    assert all(result == 201 for result in results)
+    elapsed_time = time.time() - start_time
+    print(f"Teste de carga de máquinas finalizado em {elapsed_time} segundos")
+
+def test_load_create_maintenance():
+    start_time = time.time()
+    with Pool(10) as p:  # Teste com 10 manutenções simultâneas
+        results = p.map(load_test_create_maintenance, range(10))
+    
+    # Verificando se todos os resultados são 201 (Criado com sucesso)
+    assert all(result == 201 for result in results)
+    elapsed_time = time.time() - start_time
+    print(f"Teste de carga de manutenções finalizado em {elapsed_time} segundos")
+
+def test_load_create_part():
+    start_time = time.time()
+    with Pool(10) as p:  # Teste com 10 partes simultâneas
+        results = p.map(load_test_create_part, range(10))
+    
+    # Verificando se todos os resultados são 201 (Criado com sucesso)
+    assert all(result == 201 for result in results)
+    elapsed_time = time.time() - start_time
+    print(f"Teste de carga de partes finalizado em {elapsed_time} segundos")
+
+def test_load_create_team():
+    start_time = time.time()
+    with Pool(10) as p:  # Teste com 10 equipes simultâneas
+        results = p.map(load_test_create_team, range(10))
+    
+    # Verificando se todos os resultados são 201 (Criado com sucesso)
+    assert all(result == 201 for result in results)
+    elapsed_time = time.time() - start_time
+    print(f"Teste de carga de equipes finalizado em {elapsed_time} segundos")
 
 if __name__ == "__main__":
-    pytest.main(["-s", "-v", __file__])
+    # Executando os testes unitários e de integração com pytest
+    pytest.main(["-v", "-s", __file__])

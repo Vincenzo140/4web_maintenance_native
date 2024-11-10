@@ -237,7 +237,7 @@ def machine_register(machine_create: Machines, redis_client: redis.Redis = Depen
             raise HTTPException(status_code=400, detail="Máquina já registrada.")
 
         # Salvando os dados da máquina
-        machine_data = machine_create.dict()
+        machine_data = machine_create.model_dump()
         machine_data_json = json.dumps(machine_data)
         redis_client.set(machine_id, machine_data_json)
         redis_client.sadd("machines_list", machine_id)
@@ -327,7 +327,7 @@ def update_machine(serial_number: str, machine_update: Machines, redis_client: r
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da máquina: {str(e)}")
 
         # Atualizar os dados da máquina com as informações fornecidas
-        machine_data_dict.update(machine_update.dict())
+        machine_data_dict.update(machine_update.model_dump())
         machine_data_json = json.dumps(machine_data_dict)
 
         # Atualizar os dados da máquina no Redis
@@ -373,7 +373,7 @@ def maintenance_register(maintenance_create: Maintenance, redis_client: redis.Re
             raise HTTPException(status_code=400, detail="Manutenção já registrada.")
 
         # Salvando os dados da manutenção
-        maintenance_data = maintenance_create.dict()
+        maintenance_data = maintenance_create.model_dump()
         maintenance_data['request_date'] = maintenance_data['request_date'].isoformat()
         maintenance_data_json = json.dumps(maintenance_data)
         redis_client.set(maintenance_id, maintenance_data_json)
@@ -465,7 +465,7 @@ def update_maintenance(maintenance_register_id: str, maintenance_update: Mainten
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da manutenção: {str(e)}")
 
         # Atualizar os dados da manutenção com as informações fornecidas
-        maintenance_data_dict.update(maintenance_update.dict())
+        maintenance_data_dict.update(maintenance_update.model_dump())
         maintenance_data_dict['request_date'] = maintenance_data_dict['request_date'].isoformat()
         maintenance_data_json = json.dumps(maintenance_data_dict)
 
@@ -510,7 +510,7 @@ def post_parts_of_reposition(parts_of_reposition: PostPartsOfReposition, redis_c
         if redis_client.exists(parts_of_reposition_id):
             raise HTTPException(status_code=400, detail="Parte já registrada.")
 
-        parts_of_reposition_data = parts_of_reposition.dict()
+        parts_of_reposition_data = parts_of_reposition.model_dump()
         parts_of_reposition_data_json = json.dumps(parts_of_reposition_data)
         redis_client.set(parts_of_reposition_id, parts_of_reposition_data_json)
         redis_client.sadd("parts_list", parts_of_reposition_id)
@@ -542,7 +542,7 @@ def entry_parts_on_stock(code: str, entry_parts_on_stock: EntryPartsOnStock, red
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da parte: {str(e)}")
 
         # Atualizar os dados da parte com a nova entrada
-        entry_parts_on_stock_data = entry_parts_on_stock.dict()
+        entry_parts_on_stock_data = entry_parts_on_stock.model_dump()
         entry_parts_on_stock_data['entry_date'] = entry_parts_on_stock_data['entry_date'].isoformat()
         parts_of_reposition_data_dict.update(entry_parts_on_stock_data)
         parts_of_reposition_data_json = json.dumps(parts_of_reposition_data_dict)
@@ -577,7 +577,7 @@ def exit_parts_on_stock(code: str, register_back_off_parts: RegisterBackOffParts
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da parte: {str(e)}")
 
         # Atualizar os dados da parte com a nova saída
-        register_back_off_parts_data = register_back_off_parts.dict()
+        register_back_off_parts_data = register_back_off_parts.model_dump()
         register_back_off_parts_data['exit_date'] = register_back_off_parts_data['exit_date'].isoformat()
         parts_of_reposition_data_dict.update(register_back_off_parts_data)
         parts_of_reposition_data_json = json.dumps(parts_of_reposition_data_dict)
@@ -655,7 +655,7 @@ def register_teams_on_maintenance(register_teams_on_maintenance: Teams, redis_cl
             raise HTTPException(status_code=400, detail="Equipe já registrada.")
 
         # Salvando os dados da equipe
-        team_data = register_teams_on_maintenance.dict()
+        team_data = register_teams_on_maintenance.model_dump()
         team_data_json = json.dumps(team_data)
         redis_client.set(team_id, team_data_json)
         redis_client.sadd("teams_list", team_id)
@@ -740,7 +740,7 @@ def update_team(team_name: str, team_update: Teams, redis_client: redis.Redis = 
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da equipe: {str(e)}")
 
         # Atualizar os dados da equipe com as informações fornecidas
-        team_data_dict.update(team_update.dict())
+        team_data_dict.update(team_update.model_dump())
         team_data_json = json.dumps(team_data_dict)
 
         # Atualizar os dados da equipe no Redis
@@ -783,7 +783,7 @@ def create_user(user: CreateUserAccount, redis_client: redis.Redis = Depends(get
             raise HTTPException(status_code=400, detail="Usuário já registrado.")
 
         # Criptografando a senha e salvando os dados do usuário
-        user_data = user.dict()
+        user_data = user.model_dump()
         user_data["password"] = get_password_hash(user.password)
         user_data_json = json.dumps(user_data)
         redis_client.set(user_id, user_data_json)

@@ -502,146 +502,275 @@ def delete_maintenance(maintenance_register_id: str, redis_client: redis.Redis =
 
 # Endpoint para registrar uma nova parte de reposição
 @app.post("/parts", tags=["Parts Manager"], response_model=PostPartsOfReposition, status_code=status.HTTP_201_CREATED)
-def post_parts_of_reposition(parts_of_reposition: PostPartsOfReposition) -> PostPartsOfReposition:
-    logger.info("Criando uma nova parte de reposição")
+def post_parts_of_reposition(parts_of_reposition: PostPartsOfReposition, redis_client: redis.Redis = Depends(get_redis_client)) -> PostPartsOfReposition:
+    logger.info(f"Criando uma nova parte de reposição {parts_of_reposition.name}")
     parts_of_reposition_id = f"parts:{parts_of_reposition.code}"
-    
-    if redis_client.exists(parts_of_reposition_id):
-        raise HTTPException(status_code=400, detail="Parte já registrada.")
-    
-    parts_of_reposition_data = parts_of_reposition.model_dump()
-    parts_of_reposition_data_json = json.dumps(parts_of_reposition_data)
-    redis_client.set(parts_of_reposition_id, parts_of_reposition_data_json)
-    redis_client.sadd("parts_list", parts_of_reposition_id)
-    
+
+    try:
+        if redis_client.exists(parts_of_reposition_id):
+            raise HTTPException(status_code=400, detail="Parte já registrada.")
+
+        parts_of_reposition_data = parts_of_reposition.dict()
+        parts_of_reposition_data_json = json.dumps(parts_of_reposition_data)
+        redis_client.set(parts_of_reposition_id, parts_of_reposition_data_json)
+        redis_client.sadd("parts_list", parts_of_reposition_id)
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
+
     return parts_of_reposition
 
 # Endpoint para registrar entrada de partes no estoque
 @app.post("/parts/{code}/entry", tags=["Parts Manager"], status_code=status.HTTP_201_CREATED, response_model=EntryPartsOnStock)
-def entry_parts_on_stock(code: str, entry_parts_on_stock: EntryPartsOnStock) -> EntryPartsOnStock:
+def entry_parts_on_stock(code: str, entry_parts_on_stock: EntryPartsOnStock, redis_client: redis.Redis = Depends(get_redis_client)) -> EntryPartsOnStock:
     logger.info(f"Registrando entrada de parte com código: {code}")
-    
+
     parts_of_reposition_id = f"parts:{code}"
-    
-    parts_of_reposition_data = redis_client.get(parts_of_reposition_id)
-    if not parts_of_reposition_data:
-        raise HTTPException(status_code=404, detail="Parte não encontrada")
-    parts_of_reposition_data = json.loads(parts_of_reposition_data.decode('utf-8'))
-    
-    entry_parts_on_stock_data = entry_parts_on_stock.model_dump()
-    entry_parts_on_stock_data['entry_date'] = entry_parts_on_stock_data['entry_date'].isoformat()
-    entry_parts_on_stock_data_json = json.dumps(entry_parts_on_stock_data)
-    redis_client.set(parts_of_reposition_id, entry_parts_on_stock_data_json)
-    
+
+    try:
+        # Buscar os dados da parte no Redis
+        parts_of_reposition_data = redis_client.get(parts_of_reposition_id)
+        if not parts_of_reposition_data:
+            raise HTTPException(status_code=404, detail="Parte não encontrada")
+
+        # Decodificar os dados existentes
+        try:
+            parts_of_reposition_data_dict = json.loads(parts_of_reposition_data.decode('utf-8'))
+            if not isinstance(parts_of_reposition_data_dict, dict):
+                raise ValueError(f"Formato inválido de dados: {parts_of_reposition_data_dict}")
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da parte: {str(e)}")
+
+        # Atualizar os dados da parte com a nova entrada
+        entry_parts_on_stock_data = entry_parts_on_stock.dict()
+        entry_parts_on_stock_data['entry_date'] = entry_parts_on_stock_data['entry_date'].isoformat()
+        parts_of_reposition_data_dict.update(entry_parts_on_stock_data)
+        parts_of_reposition_data_json = json.dumps(parts_of_reposition_data_dict)
+
+        # Atualizar os dados da parte no Redis
+        redis_client.set(parts_of_reposition_id, parts_of_reposition_data_json)
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
+
     return entry_parts_on_stock
 
 # Endpoint para registrar saída de partes no estoque
 @app.post("/parts/{code}/exit", tags=["Parts Manager"], status_code=status.HTTP_201_CREATED, response_model=RegisterBackOffParts)
-def exit_parts_on_stock(code: str, register_back_off_parts: RegisterBackOffParts) -> RegisterBackOffParts:
-    logger.info(f"Register back off parts with code: {code}")
-    
+def exit_parts_on_stock(code: str, register_back_off_parts: RegisterBackOffParts, redis_client: redis.Redis = Depends(get_redis_client)) -> RegisterBackOffParts:
+    logger.info(f"Registrando saída de parte com código: {code}")
+
     parts_of_reposition_id = f"parts:{code}"
-    
-    parts_of_reposition_data = redis_client.get(parts_of_reposition_id)
-    if not parts_of_reposition_data:
-        raise HTTPException(status_code=404, detail="Parte não encontrada")
-    parts_of_reposition_data = json.loads(parts_of_reposition_data.decode('utf-8'))
-    
-    register_back_off_parts_data = register_back_off_parts.model_dump()
-    register_back_off_parts_data['exit_date'] = register_back_off_parts_data['exit_date'].isoformat()
-    register_back_off_parts_data_json = json.dumps(register_back_off_parts_data)
-    redis_client.set(parts_of_reposition_id, register_back_off_parts_data_json)
-    
+
+    try:
+        # Buscar os dados da parte no Redis
+        parts_of_reposition_data = redis_client.get(parts_of_reposition_id)
+        if not parts_of_reposition_data:
+            raise HTTPException(status_code=404, detail="Parte não encontrada")
+
+        # Decodificar os dados existentes
+        try:
+            parts_of_reposition_data_dict = json.loads(parts_of_reposition_data.decode('utf-8'))
+            if not isinstance(parts_of_reposition_data_dict, dict):
+                raise ValueError(f"Formato inválido de dados: {parts_of_reposition_data_dict}")
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da parte: {str(e)}")
+
+        # Atualizar os dados da parte com a nova saída
+        register_back_off_parts_data = register_back_off_parts.dict()
+        register_back_off_parts_data['exit_date'] = register_back_off_parts_data['exit_date'].isoformat()
+        parts_of_reposition_data_dict.update(register_back_off_parts_data)
+        parts_of_reposition_data_json = json.dumps(parts_of_reposition_data_dict)
+
+        # Atualizar os dados da parte no Redis
+        redis_client.set(parts_of_reposition_id, parts_of_reposition_data_json)
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
+
     return register_back_off_parts
 
 # Endpoint para obter todas as partes registradas
 @app.get("/parts", tags=["Parts Manager"], response_model=List[PostPartsOfReposition])
-def get_parts_of_reposition() -> List[PostPartsOfReposition]:
+def get_parts_of_reposition(redis_client: redis.Redis = Depends(get_redis_client)) -> List[PostPartsOfReposition]:
     logger.info("Obtendo todas as partes de reposição")
-    parts_of_reposition_keys = redis_client.smembers("parts_list")
-    parts_of_reposition = []
-    for key in parts_of_reposition_keys:
-        parts_of_reposition_data = redis_client.get(key)
-        if parts_of_reposition_data:
-            parts_of_reposition.append(PostPartsOfReposition(**json.loads(parts_of_reposition_data.decode('utf-8'))))
-    return parts_of_reposition
+
+    try:
+        parts_of_reposition_keys = redis_client.smembers("parts_list")
+        parts_of_reposition_list = []
+
+        for key in parts_of_reposition_keys:
+            parts_of_reposition_data = redis_client.get(key)
+            if parts_of_reposition_data:
+                try:
+                    parts_of_reposition_data_dict = json.loads(parts_of_reposition_data.decode('utf-8'))
+                    if not isinstance(parts_of_reposition_data_dict, dict):
+                        raise ValueError(f"Formato inválido de dados: {parts_of_reposition_data_dict}")
+
+                    parts_of_reposition_list.append(PostPartsOfReposition(**parts_of_reposition_data_dict))
+
+                except (json.JSONDecodeError, ValueError) as e:
+                    logger.error(f"Erro ao decodificar os dados da parte: {str(e)}")
+
+        return parts_of_reposition_list
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
 # Endpoint para obter uma parte de reposição específica pelo código
 @app.get("/parts/{code}", tags=["Parts Manager"], response_model=PostPartsOfReposition, status_code=status.HTTP_200_OK)
-def get_parts_of_reposition_by_code(code: str) -> PostPartsOfReposition:
+def get_parts_of_reposition_by_code(code: str, redis_client: redis.Redis = Depends(get_redis_client)) -> PostPartsOfReposition:
     logger.info(f"Obtendo parte de reposição com código: {code}")
+
     parts_of_reposition_id = f"parts:{code}"
-    parts_of_reposition_data = redis_client.get(parts_of_reposition_id)
-    if not parts_of_reposition_data:
-        raise HTTPException(status_code=404, detail="Parte não encontrada")
-    return PostPartsOfReposition(**json.loads(parts_of_reposition_data.decode('utf-8')))
+
+    try:
+        parts_of_reposition_data = redis_client.get(parts_of_reposition_id)
+
+        if not parts_of_reposition_data:
+            raise HTTPException(status_code=404, detail="Parte não encontrada")
+
+        # Decodificar os dados da parte
+        try:
+            parts_of_reposition_data_dict = json.loads(parts_of_reposition_data.decode('utf-8'))
+            if not isinstance(parts_of_reposition_data_dict, dict):
+                raise ValueError(f"Formato inválido de dados: {parts_of_reposition_data_dict}")
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da parte: {str(e)}")
+
+        return PostPartsOfReposition(**parts_of_reposition_data_dict)
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
 # Endpoint para registrar uma nova equipe de manutenção
 @app.post("/teams", tags=["Teams Manager"], response_model=Teams, status_code=status.HTTP_201_CREATED)
-def register_teams_on_maintenance(register_teams_on_maintenance: Teams) -> Teams:
+def register_teams_on_maintenance(register_teams_on_maintenance: Teams, redis_client: redis.Redis = Depends(get_redis_client)) -> Teams:
     logger.info("Registrando nova equipe de manutenção")
     team_id = f"team:{register_teams_on_maintenance.name}"
-    
-    if redis_client.exists(team_id):
-        raise HTTPException(status_code=400, detail="Equipe já registrada.")
-    
-    team_data = register_teams_on_maintenance.model_dump()
-    team_data_json = json.dumps(team_data)
-    redis_client.set(team_id, team_data_json)
-    redis_client.sadd("teams_list", team_id)
-    
+
+    try:
+        # Verificando se a equipe já existe
+        if redis_client.exists(team_id):
+            raise HTTPException(status_code=400, detail="Equipe já registrada.")
+
+        # Salvando os dados da equipe
+        team_data = register_teams_on_maintenance.dict()
+        team_data_json = json.dumps(team_data)
+        redis_client.set(team_id, team_data_json)
+        redis_client.sadd("teams_list", team_id)
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
+
     return register_teams_on_maintenance
 
 # Endpoint para obter todas as equipes registradas
 @app.get("/teams", tags=["Teams Manager"], response_model=List[Teams])
-def get_teams() -> List[Teams]:
+def get_teams(redis_client: redis.Redis = Depends(get_redis_client)) -> List[Teams]:
     logger.info("Obtendo todas as equipes de manutenção")
-    team_keys = redis_client.smembers("teams_list")
-    teams = []
-    for key in team_keys:
-        team_data = redis_client.get(key)
-        if team_data:
-            teams.append(Teams(**json.loads(team_data.decode('utf-8'))))
-    return teams
+
+    try:
+        team_keys = redis_client.smembers("teams_list")
+        teams_list = []
+
+        # Iterando pelas chaves para obter os dados de cada equipe
+        for key in team_keys:
+            team_data = redis_client.get(key)
+            if team_data:
+                try:
+                    team_data_dict = json.loads(team_data.decode('utf-8'))
+                    if not isinstance(team_data_dict, dict):
+                        raise ValueError(f"Formato inválido de dados: {team_data_dict}")
+
+                    teams_list.append(Teams(**team_data_dict))
+
+                except (json.JSONDecodeError, ValueError) as e:
+                    logger.error(f"Erro ao decodificar os dados da equipe: {str(e)}")
+
+        return teams_list
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
 # Endpoint para obter uma equipe específica pelo nome
 @app.get("/teams/{team_name}", tags=["Teams Manager"], response_model=Teams)
-def get_team_by_name(team_name: str) -> Teams:
+def get_team_by_name(team_name: str, redis_client: redis.Redis = Depends(get_redis_client)) -> Teams:
     logger.info(f"Obtendo equipe com nome: {team_name}")
     team_id = f"team:{team_name}"
-    team_data = redis_client.get(team_id)
-    if not team_data:
-        raise HTTPException(status_code=404, detail="Equipe não encontrada")
-    return Teams(**json.loads(team_data.decode('utf-8')))
+
+    try:
+        # Buscar os dados da equipe no Redis
+        team_data = redis_client.get(team_id)
+
+        if not team_data:
+            raise HTTPException(status_code=404, detail="Equipe não encontrada")
+
+        # Decodificar os dados da equipe
+        try:
+            team_data_dict = json.loads(team_data.decode('utf-8'))
+            if not isinstance(team_data_dict, dict):
+                raise ValueError(f"Formato inválido de dados: {team_data_dict}")
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da equipe: {str(e)}")
+
+        return Teams(**team_data_dict)
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
 # Endpoint para atualizar dados de uma equipe
 @app.put("/teams/{team_name}", tags=["Teams Manager"], status_code=status.HTTP_202_ACCEPTED, response_model=Teams)
-def update_team(team_name: str, team_update: Teams) -> Teams:
+def update_team(team_name: str, team_update: Teams, redis_client: redis.Redis = Depends(get_redis_client)) -> Teams:
     logger.info(f"Atualizando dados da equipe com nome: {team_name}")
     team_id = f"team:{team_name}"
-    team_data = redis_client.get(team_id)
-    if not team_data:
-        raise HTTPException(status_code=404, detail="Equipe não encontrada")
-    team_data = json.loads(team_data.decode('utf-8'))
-    team_data.update(team_update.model_dump())
-    team_data['']
-    team_data_json = json.dumps(team_data)
-    redis_client.set(team_id, team_data_json)
-    return Teams(**team_data)
+
+    try:
+        # Buscar os dados da equipe no Redis
+        team_data = redis_client.get(team_id)
+        if not team_data:
+            raise HTTPException(status_code=404, detail="Equipe não encontrada")
+
+        # Decodificar os dados existentes da equipe
+        try:
+            team_data_dict = json.loads(team_data.decode('utf-8'))
+            if not isinstance(team_data_dict, dict):
+                raise ValueError(f"Formato inválido de dados: {team_data_dict}")
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da equipe: {str(e)}")
+
+        # Atualizar os dados da equipe com as informações fornecidas
+        team_data_dict.update(team_update.dict())
+        team_data_json = json.dumps(team_data_dict)
+
+        # Atualizar os dados da equipe no Redis
+        redis_client.set(team_id, team_data_json)
+
+        return Teams(**team_data_dict)
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
 # Endpoint para remover uma equipe
 @app.delete("/teams/{team_name}", tags=["Teams Manager"], status_code=status.HTTP_204_NO_CONTENT)
-def delete_team(team_name: str):
+def delete_team(team_name: str, redis_client: redis.Redis = Depends(get_redis_client)):
     logger.info(f"Removendo equipe com nome: {team_name}")
     team_id = f"team:{team_name}"
-    team_data = redis_client.get(team_id)
-    if not team_data:
-        raise HTTPException(status_code=404, detail="Equipe não encontrada")
-    redis_client.srem("teams_list", team_id)
-    redis_client.delete(team_id)
-    
-    return None
 
+    try:
+        # Buscar os dados da equipe no Redis
+        team_data = redis_client.get(team_id)
+        if not team_data:
+            raise HTTPException(status_code=404, detail="Equipe não encontrada")
+
+        # Remover a equipe do Redis
+        redis_client.srem("teams_list", team_id)
+        redis_client.delete(team_id)
+
+    except (ConnectionError, TimeoutError) as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
+
+    return None
 # Endpoint para criar um novo usuário
 @app.post("/users", tags=["User Management"], status_code=status.HTTP_201_CREATED, response_model=CreateUserAccount)
 def create_user(user: CreateUserAccount) -> CreateUserAccount:

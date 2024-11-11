@@ -1,1 +1,54 @@
-https://bolt.new/~/sb1-vjwko3
+
+Ei, IA, presta atenção aqui! Eu quero um frontend **PICA** para o meu backend que já tá prontinho, e ele não é qualquer backend, é um sistema robusto de gestão de manutenção industrial e inventário de máquinas e partes. Só que agora eu quero um front à altura, um que faça o pátio da indústria brilhar na tela. Vou te dar todos os detalhes, e você vai construir isso aqui com a precisão de um **cirurgião da tecnologia**. Quero tudo responsivo, bonito, UX afiado como navalha, e nada de gambiarra. Quero o **creme do creme**.
+
+### Aqui estão os endpoints:
+
+1. **Registrar Máquinas (POST /machines)**
+   - **Request body:**
+     - `serial_number` (string): Número de série da máquina, deve ser único.
+     - `name` (string): Nome da máquina.
+     - `manufacturer` (string): Fabricante.
+     - `manufacture_date` (string - formato ISO 8601): Data de fabricação.
+     - `model` (string): Modelo da máquina.
+     - `specifications` (string): Especificações técnicas.
+     - `type` (string): Tipo da máquina (e.g., Tipo A, Tipo B).
+     - `location` (string): Localização onde está instalada.
+     - `maintenance_history` (list de strings): Histórico de manutenção (inicialmente vazio).
+     - `status` (string): Deve ser um dos valores “**operando**”, “**Quebrado**”, “**Em Manutenção**”.
+
+2. **Obter Todas as Máquinas (GET /machines)**
+   - **Response:** Lista de objetos de máquinas com todos os campos acima.
+
+3. **Obter Máquina Específica (GET /machines/{serial_number})**
+   - **Path Parameter:**
+     - `serial_number` (string): Número de série da máquina.
+   - **Response:** Um objeto máquina com os campos detalhados acima.
+
+4. **Atualizar Máquina (PUT /machines/{serial_number})**
+   - **Path Parameter:**
+     - `serial_number` (string): Número de série da máquina.
+   - **Request body:** Todos os campos da máquina que podem ser atualizados.
+
+5. **Remover Máquina (DELETE /machines/{serial_number})**
+   - **Path Parameter:**
+     - `serial_number` (string): Número de série da máquina.
+
+### Informarções sobre outros Endpoints:
+- **Registrar Partes de Reposição (POST /parts)**: Campos necessários incluem `name`, `code`, `supplier`, `quantity`, `unit_price`, `description`. Tudo precisa estar no padrão.
+- **Registrar Equipes de Manutenção (POST /teams)**: Requer `name`, `members` (lista de membros) e `specialties` (lista de especialidades).
+- **Registrar Usuários (POST /users)**: Campos incluem `username`, `password`, `role`.
+- **Login (POST /token)**: Validação de usuário e senha, gera um token JWT para autenticação.
+
+### Características do Frontend que eu quero:
+- **SPA (Single Page Application)**: Não quero tempo perdido com load de páginas desnecessário. Tudo na fluidez.
+- **Framework:** Use **Vue.js** ou **React**, depende do que você dominar melhor.
+- **Dashboard Top**: Painel de visualização das máquinas e manutenções, com indicadores de status (cores diferentes pra cada estado da máquina).
+- **Componentes Reutilizáveis**: Quero um sistema modular para que cada componente (cards de máquina, formulários de entrada, modais) possa ser reaproveitado.
+- **Autenticação JWT**: Integre o login com o backend usando tokens JWT. Toda navegação do front deve ser segura, com áreas protegidas para acesso autorizado.
+- **Design**: Limpo, responsivo, e que se encaixe em tela grande (dashboards) e móveis. Nada de UI congestionada. Utilize **TailwindCSS** ou **Bootstrap** para estilização.
+- **Relatórios**: Tenha uma área para gerar relatórios em PDF, como estado das máquinas e manutenções recentes.
+
+Quero que o resultado seja **impactante**, não só funcional, mas bonito também. Resuma todas as informações complexas em uma interface amigável para o usuário final, seja um operador de máquinas ou um gestor da indústria. Cada componente, cada detalhe, tem que ser feito com **excelência**.
+
+Agora vai e faz a mágica acontecer!
+

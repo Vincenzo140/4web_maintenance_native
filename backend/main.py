@@ -71,7 +71,7 @@ class Machines(BaseModel):
     serial_number: str
     location: str
     maintenance_history: List[str]
-    status: Literal["operando", "Quebrado", "Em Manuntenção"]
+    status: Literal["Operando", "Quebrado", "Em manutenção"]
     
 class Maintenance(BaseModel):
     maintenance_register_id: int
@@ -81,7 +81,6 @@ class Maintenance(BaseModel):
     assigned_team: str
     status: str
     machine_id: str
-
 
 
 class PostPartsOfReposition(BaseModel):
@@ -98,7 +97,6 @@ class EntryPartsOnStock(BaseModel):
 class RegisterBackOffParts(BaseModel):
     quantity: int
     exit_date: date = date.today()
-
 
 class Teams(BaseModel):
     name: str

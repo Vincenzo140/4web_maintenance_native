@@ -12,7 +12,6 @@ def create_machine():
         "name": "Maquina Teste",
         "type": "Industrial",
         "model": "Mod-XYZ",
-        "manufacture_data": "2022-01-01",
         "serial_number": "SN-123456",
         "location": "Linha de produção A",
         "maintenance_history": ["Substituição de motor em 2023"],

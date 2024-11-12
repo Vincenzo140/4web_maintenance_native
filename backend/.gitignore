@@ -5,11 +5,12 @@ __pycache__/
 
 # C extensions
 *.so
-
+.pystes_cache/
 # Distribution / packaging
 .Python
 build/
 develop-eggs/
+__init__.py/
 dist/
 downloads/
 eggs/

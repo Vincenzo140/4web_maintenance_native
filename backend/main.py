@@ -6,8 +6,11 @@ from app.routes.maintenance import router as maintenance_router
 from app.routes.parts import router as parts_router
 from app.routes.teams import router as teams_router
 from app.routes.users import router as users_router
+from app.logging.logger import AppLogger
 
-app = FastAPI()
+logger = AppLogger().get_logger()
+ 
+app = FastAPI(title="Management System API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +26,11 @@ app.include_router(teams_router, prefix="/teams")
 app.include_router(machine_router, prefix="/machines")
 app.include_router(parts_router, prefix="/parts")
 app.include_router(maintenance_router, prefix="/maintenance")
+
+@app.get("/")
+def read_root():
+    logger.info("Servidor iniciado com sucesso")
+    return {"message": f"{app.title}", "version": f"{app.version}"}
 
 # Inicializando o servidor
 if __name__ == "__main__":

@@ -24,20 +24,32 @@ interface MachineDialogProps {
   onSuccess: () => void;
 }
 
+interface MachineData {
+  name: string;
+  type: string;
+  model: string;
+  manufacturer: string;
+  serial_number: string;
+  specifications: string;
+  location: string;
+  maintenance_history: string[];
+  status: 'operando' | 'Quebrado' | 'Em Manutenção';
+}
+
 export default function MachineDialog({
   open,
   onOpenChange,
   onSuccess,
 }: MachineDialogProps) {
-  const [formData, setFormData] = useState({
-    serial_number: '',
+  const [formData, setFormData] = useState<MachineData>({
     name: '',
-    manufacturer: '',
-    manufacture_date: '',
-    model: '',
-    specifications: '',
     type: '',
+    model: '',
+    manufacturer: '',
+    serial_number: '',
+    specifications: '',
     location: '',
+    maintenance_history: [],
     status: 'operando',
   });
 
@@ -56,6 +68,14 @@ export default function MachineDialog({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleMaintenanceHistoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      maintenance_history: value.split(',').map((item) => item.trim()),
+    }));
   };
 
   return (
@@ -97,11 +117,60 @@ export default function MachineDialog({
               />
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="model">Modelo</Label>
+              <Input
+                id="model"
+                name="model"
+                value={formData.model}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="type">Tipo</Label>
+              <Input
+                id="type"
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="specifications">Especificações</Label>
+              <Input
+                id="specifications"
+                name="specifications"
+                value={formData.specifications}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="location">Localização</Label>
+              <Input
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="maintenance_history">Histórico de Manutenção</Label>
+              <Input
+                id="maintenance_history"
+                name="maintenance_history"
+                value={formData.maintenance_history.join(', ')}
+                onChange={handleMaintenanceHistoryChange}
+              />
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
                 onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, status: value }))
+                  setFormData((prev) => ({ ...prev, status: value as MachineData['status'] }))
                 }
               >
                 <SelectTrigger>

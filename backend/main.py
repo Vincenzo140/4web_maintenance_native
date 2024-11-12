@@ -6,13 +6,13 @@ from datetime import date, datetime, timedelta
 import redis
 from logger import AppLogger
 from fastapi.middleware.cors import CORSMiddleware
-from jose import JWTError, jwt
+from jose import JWTError
+from jose import jwt
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import redis
 from redis.exceptions import ConnectionError, TimeoutError
 from tenacity import retry, wait_exponential, stop_after_attempt
-
 from redis import Redis
 
 app = FastAPI()

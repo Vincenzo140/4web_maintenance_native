@@ -9,8 +9,8 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getMachines } from '@/lib/api';
-import { Plus, Search } from 'lucide-react';
+import { getMachines, deleteMachine } from '@/lib/api'; // Função para excluir máquina
+import { Plus, Search, Trash } from 'lucide-react';
 import MachineDialog from './machine-dialog';
 import { Badge } from '@/components/ui/badge';
 
@@ -38,6 +38,15 @@ export default function Machines() {
       setMachines(data);
     } catch (error) {
       console.error('Erro ao buscar máquinas:', error);
+    }
+  };
+
+  const handleDelete = async (serialNumber: string) => {
+    try {
+      await deleteMachine(serialNumber);
+      fetchMachines(); // Atualiza a lista após exclusão
+    } catch (error) {
+      console.error('Erro ao excluir máquina:', error);
     }
   };
 
@@ -97,14 +106,13 @@ export default function Machines() {
               <TableHead>Modelo</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Localização</TableHead>
+              <TableHead>Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredMachines.map((machine) => (
               <TableRow key={machine.serial_number}>
-                <TableCell className="font-medium">
-                  {machine.serial_number}
-                </TableCell>
+                <TableCell className="font-medium">{machine.serial_number}</TableCell>
                 <TableCell>{machine.name}</TableCell>
                 <TableCell>{machine.manufacturer}</TableCell>
                 <TableCell>{machine.model}</TableCell>
@@ -114,17 +122,24 @@ export default function Machines() {
                   </Badge>
                 </TableCell>
                 <TableCell>{machine.location}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(machine.serial_number)}
+                    className="flex items-center"
+                  >
+                    <Trash className="mr-1 h-4 w-4" />
+                    Excluir
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
 
-      <MachineDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onSuccess={fetchMachines}
-      />
+      <MachineDialog open={dialogOpen} onOpenChange={setDialogOpen} onSuccess={fetchMachines} />
     </div>
   );
 }

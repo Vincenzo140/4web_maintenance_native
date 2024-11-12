@@ -1,54 +1,98 @@
+Preste atenção, desenvolvedor. Vou te dar todas as instruções que você precisa para criar o frontend perfeito para a API abaixo. Não admito falhas ou inconsistências aqui, então siga tudo ao pé da letra, sem questionar.
 
-Ei, IA, presta atenção aqui! Eu quero um frontend **PICA** para o meu backend que já tá prontinho, e ele não é qualquer backend, é um sistema robusto de gestão de manutenção industrial e inventário de máquinas e partes. Só que agora eu quero um front à altura, um que faça o pátio da indústria brilhar na tela. Vou te dar todos os detalhes, e você vai construir isso aqui com a precisão de um **cirurgião da tecnologia**. Quero tudo responsivo, bonito, UX afiado como navalha, e nada de gambiarra. Quero o **creme do creme**.
+Além disso, vou te dar um exemplo de design que você deve seguir para implementar a interface do usuário. Não desvie em nada do design que estou fornecendo — siga as instruções detalhadamente para criar o layout que será mostrado no frontend.
 
-### Aqui estão os endpoints:
+### Design da Interface
+O design da interface deve seguir o exemplo fornecido na imagem. Vou descrever os elementos principais que você deve implementar:
 
-1. **Registrar Máquinas (POST /machines)**
-   - **Request body:**
-     - `serial_number` (string): Número de série da máquina, deve ser único.
-     - `name` (string): Nome da máquina.
-     - `manufacturer` (string): Fabricante.
-     - `manufacture_date` (string - formato ISO 8601): Data de fabricação.
-     - `model` (string): Modelo da máquina.
-     - `specifications` (string): Especificações técnicas.
-     - `type` (string): Tipo da máquina (e.g., Tipo A, Tipo B).
-     - `location` (string): Localização onde está instalada.
-     - `maintenance_history` (list de strings): Histórico de manutenção (inicialmente vazio).
-     - `status` (string): Deve ser um dos valores “**operando**”, “**Quebrado**”, “**Em Manutenção**”.
+1. **Layout Principal**
+   - O layout da aplicação deve ser dividido em uma barra lateral à esquerda e o conteúdo principal à direita.
+   - A barra lateral deve conter os seguintes itens de menu:
+     - **Dashboard**: Ícone de dashboard e texto "Dashboard".
+     - **Máquinas**: Ícone de engrenagem e texto "Máquinas".
+     - **Peças**: Ícone de caixa e texto "Peças".
+     - **Equipes**: Ícone de equipe e texto "Equipes".
+     - **Sair**: Ícone de logout e texto "Sair", em vermelho.
 
-2. **Obter Todas as Máquinas (GET /machines)**
-   - **Response:** Lista de objetos de máquinas com todos os campos acima.
+2. **Dashboard**
+   - No topo da seção de dashboard, exiba o título "Dashboard" e uma legenda "Visão geral do sistema de manutenção industrial".
+   - Abaixo do título, exiba quatro cartões com as seguintes informações:
+     - **Total de Máquinas**: Mostra o número total de máquinas registradas (por exemplo, "5").
+     - **Em Operação**: Mostra o número de máquinas que estão em operação, com um ícone de status verde.
+     - **Em Manutenção**: Mostra o número de máquinas em manutenção, com um ícone de chave inglesa.
+     - **Quebradas**: Mostra o número de máquinas quebradas, com um ícone de alerta vermelho.
 
-3. **Obter Máquina Específica (GET /machines/{serial_number})**
-   - **Path Parameter:**
-     - `serial_number` (string): Número de série da máquina.
-   - **Response:** Um objeto máquina com os campos detalhados acima.
+3. **Alertas Recentes**
+   - Abaixo dos cartões do dashboard, exiba uma seção chamada "Alertas Recentes".
+   - Nesta seção, mostre as notificações do sistema, por exemplo: "Existem 2 máquinas com problemas que precisam de atenção". Este alerta deve ter um estilo visual chamativo (fundo vermelho com texto branco).
 
-4. **Atualizar Máquina (PUT /machines/{serial_number})**
-   - **Path Parameter:**
-     - `serial_number` (string): Número de série da máquina.
-   - **Request body:** Todos os campos da máquina que podem ser atualizados.
+### Configurações Gerais
+- Utilize `Axios` para chamadas HTTP e configure-o corretamente para cada endpoint.
+- Todos os endpoints exigem cabeçalho de `Content-Type: application/json`.
+- A autenticação é feita através de um token JWT que deve ser enviado no cabeçalho `Authorization: Bearer <token>` para as rotas autenticadas.
+- Caso não possua o token, redirecione o usuário para a tela de login.
 
-5. **Remover Máquina (DELETE /machines/{serial_number})**
-   - **Path Parameter:**
-     - `serial_number` (string): Número de série da máquina.
+### Endpoints
 
-### Informarções sobre outros Endpoints:
-- **Registrar Partes de Reposição (POST /parts)**: Campos necessários incluem `name`, `code`, `supplier`, `quantity`, `unit_price`, `description`. Tudo precisa estar no padrão.
-- **Registrar Equipes de Manutenção (POST /teams)**: Requer `name`, `members` (lista de membros) e `specialties` (lista de especialidades).
-- **Registrar Usuários (POST /users)**: Campos incluem `username`, `password`, `role`.
-- **Login (POST /token)**: Validação de usuário e senha, gera um token JWT para autenticação.
+1. **Registrar Máquina**
+   - **Método:** POST
+   - **Rota:** `/machines`
+   - **Tipo de Request:** JSON
+   - **Corpo da Requisição: **
+     ```json
+     {
+       "name": "string",
+       "type": "string",
+       "model": "string",
+       "serial_number": "string",
+       "location": "string",
+       "maintenance_history": ["string"],
+       "status": "operando | Quebrado | Em Manuntenção"
+     }
+     ```
+   - **Resposta Esperada:** Status 201, corpo da resposta igual ao request.
 
-### Características do Frontend que eu quero:
-- **SPA (Single Page Application)**: Não quero tempo perdido com load de páginas desnecessário. Tudo na fluidez.
-- **Framework:** Use **Vue.js** ou **React**, depende do que você dominar melhor.
-- **Dashboard Top**: Painel de visualização das máquinas e manutenções, com indicadores de status (cores diferentes pra cada estado da máquina).
-- **Componentes Reutilizáveis**: Quero um sistema modular para que cada componente (cards de máquina, formulários de entrada, modais) possa ser reaproveitado.
-- **Autenticação JWT**: Integre o login com o backend usando tokens JWT. Toda navegação do front deve ser segura, com áreas protegidas para acesso autorizado.
-- **Design**: Limpo, responsivo, e que se encaixe em tela grande (dashboards) e móveis. Nada de UI congestionada. Utilize **TailwindCSS** ou **Bootstrap** para estilização.
-- **Relatórios**: Tenha uma área para gerar relatórios em PDF, como estado das máquinas e manutenções recentes.
+2. **Obter Todas as Máquinas**
+   - **Método:** GET
+   - **Rota:** `/machines`
+   - **Resposta Esperada:** Status 200, lista de máquinas no formato:
+     ```json
+     [
+       {
+         "name": "string",
+         "type": "string",
+         "model": "string",
+         "serial_number": "string",
+         "location": "string",
+         "maintenance_history": ["string"],
+         "status": "operando | Quebrado | Em Manuntenção"
+       }
+     ]
+     ```
 
-Quero que o resultado seja **impactante**, não só funcional, mas bonito também. Resuma todas as informações complexas em uma interface amigável para o usuário final, seja um operador de máquinas ou um gestor da indústria. Cada componente, cada detalhe, tem que ser feito com **excelência**.
+3. **Obter Máquina por Serial Number**
+   - **Método:** GET
+   - **Rota:** `/machines/{serial_number}`
+   - **Resposta Esperada:** Status 200, corpo no mesmo formato da máquina obtida.
 
-Agora vai e faz a mágica acontecer!
+4. **Atualizar Máquina**
+   - **Método:** PUT
+   - **Rota:** `/machines/{serial_number}`
+   - **Tipo de Request:** JSON
+   - **Corpo da Requisição:** Igual ao de registro de máquina.
+   - **Resposta Esperada:** Status 202, corpo igual ao request.
+
+5. **Deletar Máquina**
+   - **Método:** DELETE
+   - **Rota:** `/machines/{serial_number}`
+   - **Resposta Esperada:** Status 204, sem corpo na resposta.
+
+### Importante
+- Qualquer erro, como campos obrigatórios faltando ou valores inválidos, resultará em uma resposta 422 da API. Portanto, todas as validações de formulário devem ser feitas do lado do frontend antes do envio.
+- Cuide das mensagens de erro! Quando um erro for encontrado, mostre de forma clara e não esconda o problema do usuário. Isso é vital para evitar frustração.
+
+### Outras Rotas
+- Siga o mesmo formato rigoroso para os endpoints de manutenção, peças, equipes, e usuários conforme especificado. Nada deve ser inventado ou alterado sem consulta.
+
+Fico no aguardo de sua implementação e lembre-se: não admito falhas.
 

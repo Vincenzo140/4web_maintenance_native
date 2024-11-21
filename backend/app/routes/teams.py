@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from app.logging.logger import AppLogger
-from app.models.schemas import Teams
-from app.redis_setting.redis_pool import get_redis_client
+from backend.app.maintenance.schemas import Teams
+from backend.app.models.nosql.redis_pool import get_redis_client
 import redis
 import json
 from typing import List

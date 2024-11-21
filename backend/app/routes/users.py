@@ -1,13 +1,13 @@
-from app.redis_setting.redis_pool import redis_client
+from backend.app.models.nosql.redis_pool import redis_client
 from app.auther.auth  import verify_password, SECRET_KEY, ALGORITHM, oauth2_scheme, create_access_token, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
 import json
 from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from app.logging.logger import AppLogger
-from app.models.schemas import TokenData, CreateUserAccount, ManageUsersPermissions, Token
+from backend.app.maintenance.schemas import TokenData, CreateUserAccount, ManageUsersPermissions, Token
 from datetime import datetime, timedelta
-from app.redis_setting.redis_pool import redis_client, get_redis_client
+from backend.app.models.nosql.redis_pool import get_redis_client
 import redis
 from fastapi import APIRouter
 

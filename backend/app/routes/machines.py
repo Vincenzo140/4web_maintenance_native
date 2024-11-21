@@ -1,9 +1,9 @@
 from fastapi import  APIRouter, Depends, HTTPException, status
 import json 
-from app.models.schemas import Machines
+from backend.app.maintenance.schemas import Machines
 from app.logging.logger import AppLogger
 import redis
-from app.redis_setting.redis_pool import get_redis_client
+from backend.app.models.nosql.redis_pool import get_redis_client
 from typing import List, Union, Literal
 
 

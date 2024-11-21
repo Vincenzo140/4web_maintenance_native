@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.models.schemas import PostPartsOfReposition, EntryPartsOnStock
+from backend.app.maintenance.schemas import PostPartsOfReposition, EntryPartsOnStock
 import json
 from app.logging.logger import AppLogger
-from app.redis_setting.redis_pool import get_redis_client
+from backend.app.models.nosql.redis_pool import get_redis_client
 import redis
-from app.models.schemas import PostPartsOfReposition, RegisterBackOffParts
+from backend.app.maintenance.schemas import PostPartsOfReposition, RegisterBackOffParts
 from typing import Optional, List
 
 router = APIRouter()

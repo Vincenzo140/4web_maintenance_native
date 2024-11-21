@@ -21,11 +21,11 @@ app.add_middleware(
 )
 
 # Incluindo os routers corretamente
-app.include_router(users_router, prefix="/users")
-app.include_router(teams_router, prefix="/teams")
-app.include_router(machine_router, prefix="/machines")
-app.include_router(parts_router, prefix="/parts")
-app.include_router(maintenance_router, prefix="/maintenance")
+app.include_router(users_router)
+app.include_router(teams_router) 
+app.include_router(machine_router)
+app.include_router(parts_router) 
+app.include_router(maintenance_router)
 
 @app.get("/")
 def read_root():

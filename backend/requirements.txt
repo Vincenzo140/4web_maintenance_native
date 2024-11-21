@@ -1,0 +1,23 @@
+uvicorn
+fastapi
+redis
+fastapi[standard]
+tenacity
+passlib
+passlib[bcrypt]
+python-multipart
+pydantic
+pytz
+python-jose
+python-jose[cryptography]
+uvicorn[standard]
+uvloop
+gunicorn
+
+# For testing
+pytest
+pytest-cov
+pytest-asyncio
+coverage
+coveralls
+odmantic

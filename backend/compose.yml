@@ -1,0 +1,24 @@
+services:
+  app-a:
+    container_name: app_main
+    build: .
+    volumes:
+      - .:/source/
+    ports:
+      - 8000:8000
+    depends_on:
+      - redis
+    networks:
+      - mynetwork
+
+  redis:
+    container_name: redis-server
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:

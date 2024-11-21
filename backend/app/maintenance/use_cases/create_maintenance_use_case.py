@@ -1,5 +1,5 @@
 from app.base_use_case import BaseUseCase
-from app.machines.schemas import CreateMachinesSchema
+from app.maintenance.schemas import CreateMaintenanceSchema 
 from infrastructure.logger import Logger
 from services.machines_service import MachineService
 

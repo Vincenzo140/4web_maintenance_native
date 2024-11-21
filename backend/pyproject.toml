@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "4WEB_MAINTENANCE"
+version = "0.1.0"
+description = "A project using FastAPI with Redis and other dependencies"
+authors = ["Vincenzo Amendola <vincenzo.amendola141@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.0"
+redis = "*"
+tenacity = "*"
+passlib = "*"
+passlib-bcrypt = "*"
+python-multipart = "*"
+pydantic = "*"
+pytz = "*"
+python-jose = "*"
+python-jose-cryptography = "*"
+uvicorn = "^0.31.1"
+uvloop = "*"
+gunicorn = "^23.0.0"
+pytest = "^8.3.3"
+dependency-injector = "^4.42.0"
+google-auth = "^2.35.0"
+requests = "^2.32.3"
+odmantic = "^1.0.2"
+aiologger = "^0.7.0"
+pymongo = "4.9"
+motor = "^3.6.0"
+aiokafka = "^0.12.0"
+sqlalchemy = "^2.0.36"
+python-dotenv = "^1.0.1"
+psycopg = "^3.2.3"
+psycopg-binary = "^3.2.3"
+alembic = "^1.14.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-asyncio = "*"
+coverage = "*"
+coveralls = "*"
+odmantic = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

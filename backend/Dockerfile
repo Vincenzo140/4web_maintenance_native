@@ -1,23 +1,26 @@
-# Dockerfile
+# Use a imagem base do Python
+FROM python:3.11-slim-buster
 
-# Use a imagem oficial do Python como base
-FROM python:3.13-slim
-
-# Defina o diretório de trabalho
+# Define o diretório de trabalho
 WORKDIR /app
 
-# Copie os arquivos de requisitos e instale as dependências
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Copia os arquivos de configuração do Poetry
+COPY pyproject.toml poetry.lock ./
 
-# Copie todo o código da aplicação para o contêiner
+# Instala o Poetry
+RUN pip install poetry==1.8.3
+
+# Instala as dependências do projeto
+RUN poetry config virtualenvs.create false && poetry install --no-dev --no-interaction --no-ansi
+
+# Copia o restante dos arquivos do projeto
 COPY . .
 
-# Adicione o diretório do Python ao PATH
-ENV PATH="./.local/bin:$PATH"
+# Define a variável de ambiente PYTHONPATH
+ENV PYTHONPATH=/app
 
-# Exponha a porta que o FastAPI usa
+# Expondo a porta que sua aplicação irá usar
 EXPOSE 8000
 
-# Comando para iniciar o servidor FastAPI
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Comando de inicialização da aplicação
+CMD ["python", "backend/app.py"]

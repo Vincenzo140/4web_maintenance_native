@@ -9,8 +9,10 @@ from app.routes.users import router as users_router
 from app.logging.logger import AppLogger
 
 logger = AppLogger().get_logger()
- 
-app = FastAPI(title="Management System API", version="1.0.0")
+
+globals() [description] = f"Access http://localhost:8000 for free sauce"
+
+app = FastAPI(title=f"Management System API", version="1.0.0", description=globals() [description])
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,7 +32,7 @@ app.include_router(maintenance_router)
 @app.get("/")
 def read_root():
     logger.info("Servidor iniciado com sucesso")
-    return {"message": f"{app.title}", "version": f"{app.version}"}
+    return {"message": f"{app.title}", "version": f"{app.version}", "description": f"{app.description}"}
 
 # Inicializando o servidor
 if __name__ == "__main__":

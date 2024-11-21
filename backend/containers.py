@@ -1,6 +1,10 @@
 from dependency_injector import containers, providers
 from app.machines.use_cases.create_machines_use_case import CreateMachineUseCase 
 from app.machines.use_cases.delete_machines_use_case import  DeleteMachineUseCase
+from app.machines.use_cases.get_machines_use_case import GetMachineUseCase
+from app.machines.use_cases.get_all_machines_use_case import GetAllMachineUseCase
+from app.machines.use_cases.update_machines_use_case import UpdateMachineUseCase
+
 
 from config import Config
 from infrastructure.broker.async_kafka import AsyncKafkaBroker
@@ -38,12 +42,12 @@ class Container(containers.DeclarativeContainer):
 
     machine_service = providers.Factory(MachineService, nosql_machine_repository, sql_machine_repository, broker, logger)
 
-    get_all_forms_use_case = providers.Factory(GetAllMachineUseCase, machine_service, logger)
+    get_all_machines_use_case = providers.Factory(GetAllMachineUseCase, machine_service, logger)
 
-    create_form_use_case = providers.Factory(CreateMachineUseCase, machine_service, logger)
+    create_machine_use_case = providers.Factory(CreateMachineUseCase, machine_service, logger)
 
-    get_form_use_case = providers.Factory(GetMachineUseCase, machine_service, logger)
+    get_machine_use_case = providers.Factory(GetMachineUseCase, machine_service, logger)
     
-    update_form_use_case = providers.Factory(UpdateFormUseCase, machine_service, logger)
+    update_machine_use_case = providers.Factory(UpdateMachineUseCase, machine_service, logger)
 
-    delete_form_use_case = providers.Factory(DeleteMachineUseCase, machine_service, logger)
+    delete_machine_use_case = providers.Factory(DeleteMachineUseCase, machine_service, logger)

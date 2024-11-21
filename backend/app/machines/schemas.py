@@ -11,7 +11,7 @@ class CreateMachinesSchema(BaseModel):
     serial_number: str
     location: str
     maintenance_history: List[str]
-    status: Literal["Operando", "Quebrado", "Em manutencao"]
+    status: str
 
 class UpdateMachinesSchema(BaseModel):
     name: Optional[str] = None
@@ -20,7 +20,7 @@ class UpdateMachinesSchema(BaseModel):
     serial_number: Optional[str] = None
     location: Optional[str] = None
     maintenance_history: Optional[List[str]] = None
-    status: Optional[Literal["Operando", "Quebrado", "Em manutencao"]] = None
+    status: Optional[str] = None
 
 class DeleteMachinesSchema(BaseModel):
     machine_id: str

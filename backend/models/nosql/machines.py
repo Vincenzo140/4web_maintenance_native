@@ -1,5 +1,5 @@
 from odmantic import Model, Field
-from typing import List, Literal, Optional
+from typing import List, Optional
 from datetime import datetime
 
 # Model ODMantic para Machines
@@ -10,7 +10,7 @@ class Machine(Model):
     serial_number: str = Field(..., description="Número de série da máquina")
     location: str = Field(..., description="Localização da máquina")
     maintenance_history: List[str] = Field(default_factory=list, description="Histórico de manutenção da máquina")
-    status: Literal["Operando", "Quebrado", "Em manutencao"] = Field(..., description="Status atual da máquina")
+    status: str = Field(..., description="Status atual da máquina")
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Data de criação do registro")
     updated_at: Optional[datetime] = Field(None, description="Data da última atualização do registro")
 

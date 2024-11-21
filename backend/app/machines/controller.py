@@ -3,8 +3,6 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, FastAPI
 from dependency_injector.wiring import inject, Provide
 from fastapi.responses import JSONResponse
-from google.oauth2 import id_token
-from google.auth.transport import requests
 
 from app.machines.schemas import CreateMachinesSchema, UpdateMachinesSchema
 from app.machines.use_cases.create_machines_use_case import CreateMachineUseCase
@@ -25,24 +23,27 @@ async def create_form(
     logger: Logger = Depends(Provide[Container.logger])    
 ):
     await create_machine_use_case.run(machine_data)
+    logger.info("Machine created successfully")
     return JSONResponse(
-        content={"message": "Auth", "detail": 'data'}
+        content={"message": "Machine created successfully", "detail": 'data'}
     )
 
-@router.put("/machines/{machines_id}", tags=["Machines"], response_model=UpdateMachinesSchema)
+@router.put("/machines/{machine_id}", tags=["Machines"], response_model=UpdateMachinesSchema)
 @inject
 async def update_machine(
     machine_id: str,
-    form_data: UpdateMachinesSchema,
+    machine_data: UpdateMachinesSchema,
     update_machine_use_case: UpdateMachineUseCase = Depends(Provide[Container.update_machine_use_case]),
     logger: Logger = Depends(Provide[Container.logger])
 ):
-    updated_form = await update_machine_use_case.run(machine_id, form_data)
-    if not updated_form:
-        raise HTTPException(status_code=404, detail="Form not found or not updated")
-    return {"message": "Form updated successfully"}
+    updated_machine = await update_machine_use_case.run(machine_id, machine_data)
+    if not updated_machine:
+        logger.error(f"Machine with ID {machine_id} not found or not updated")
+        raise HTTPException(status_code=404, detail="Machine not found or not updated")
+    logger.info(f"Machine with ID {machine_id} updated successfully")
+    return {"message": "Machine updated successfully"}
 
-@router.get("/machines/{machine_id}", tags=["Machines"], response_class=GetMachineUseCase)
+@router.get("/machines/{machine_id}", tags=["Machines"], response_model=CreateMachinesSchema)
 @inject
 async def get_machine(
     machine_id: str,
@@ -51,21 +52,24 @@ async def get_machine(
 ):
     machine = await get_machine_use_case.run(machine_id)
     if not machine:
+        logger.error(f"Machine with ID {machine_id} not found")
         raise HTTPException(status_code=404, detail="Machine not found")
+    logger.info(f"Machine with ID {machine_id} retrieved successfully")
     return machine
 
-@router.delete("/machines/{machine_id}", tags=["Machines"], response_class=DeleteMachineUseCase)
+@router.delete("/machines/{machine_id}", tags=["Machines"])
 @inject
 async def delete_machine(
     machine_id: str,
-    delete_machine_use_case: DeleteMachineUseCase = Depends(Provide[Container.delete_form_use_case]),
+    delete_machine_use_case: DeleteMachineUseCase = Depends(Provide[Container.delete_machine_use_case]),
     logger: Logger = Depends(Provide[Container.logger])
 ):
     deleted = await delete_machine_use_case.run(machine_id)
     if not deleted:
-        raise HTTPException(status_code=404, detail="Form not found or not deleted")
-    return {"message": "Macchine deleted successfully"}
-
+        logger.error(f"Machine with ID {machine_id} not found or not deleted")
+        raise HTTPException(status_code=404, detail="Machine not found or not deleted")
+    logger.info(f"Machine with ID {machine_id} deleted successfully")
+    return {"message": "Machine deleted successfully"}
 
 @router.get("/machines", tags=["Machines"])
 @inject
@@ -79,6 +83,9 @@ async def list_machines(
     logger: Logger = Depends(Provide[Container.logger])
 ):
     machines_list = await get_all_machines_use_case.run(start_date=start_date, end_date=end_date, limit=limit, offset=offset)
+    logger.info("Machines list retrieved successfully")
     return machines_list
+
 def configure(app: FastAPI):
     app.include_router(router)
+

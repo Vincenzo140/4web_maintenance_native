@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable
 
-from backend.infrastructure.broker.consumer import Consumer
-from backend.infrastructure.broker.producer import Producer
+from infrastructure.broker.consumer import Consumer
+from infrastructure.broker.producer import Producer
 
 class AbstractBroker(metaclass=ABCMeta):
 

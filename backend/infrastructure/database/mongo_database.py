@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from odmantic import AIOEngine
 
-from form_generator.infrastructure.database.database import IDatabase
+from infrastructure.database.database import IDatabase
 
 class MongoDatabase(IDatabase):
     def __init__(self, database: str, host: str, port: str, user: str, password: str) -> None:

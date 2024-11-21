@@ -1,5 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Union, Literal, Optional
+from datetime import datetime
+
 
 # Schema CRUD para Machines
 class CreateMachinesSchema(BaseModel):
@@ -27,5 +29,8 @@ class GetMachinesSchema(BaseModel):
     machine_id: str
 
 class GetAllMachinesSchema(BaseModel):
+    start_date: Optional [datetime] = Field(None, description="This provides the start date")
+    end_date: Optional [datetime] = Field(None, description="This provides the end date")
     limit: Optional[int] = None
     offset: Optional[int] = None
+    

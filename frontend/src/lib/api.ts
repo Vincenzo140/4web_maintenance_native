@@ -1,16 +1,21 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+
+// Unified error handler
 function handleError(error: any) {
   if (error instanceof Response) {
     console.error(`Error: ${error.status} - ${error.statusText}`);
   } else if (error.detail) {
     console.error(`Error: ${error.detail}`);
+  } else if (error.message) {
+    console.error(`Error: ${error.message}`);
   } else {
     console.error('An unknown error occurred');
   }
   throw error;
 }
 
+// Login function
 export async function login(username: string, password: string) {
   if (!username || !password) {
     throw new Error('Username and password must be provided');
@@ -41,7 +46,8 @@ export async function login(username: string, password: string) {
   }
 }
 
-async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+// Authenticated fetch function
+export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem('token');
   if (!token) {
     throw new Error('No authentication token found');
@@ -76,7 +82,8 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   }
 }
 
-interface MachineData {
+// Machine-related APIs
+export interface MachineData {
   name: string;
   type: string;
   model: string;
@@ -112,16 +119,11 @@ export async function deleteMachine(serialNumber: string) {
   return fetchWithAuth(`/machines/${encodeURIComponent(serialNumber)}`, { method: 'DELETE' });
 }
 
-interface PartData {
+// Part-related APIs
+export interface PartData {
   partName: string;
   manufacturer: string;
-  // outros campos relevantes
-}
-
-interface TeamData {
-  teamName: string;
-  members: string[];
-  // outros campos relevantes
+  // Add other relevant fields as needed
 }
 
 export async function createPart(data: PartData) {
@@ -129,6 +131,12 @@ export async function createPart(data: PartData) {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+// Team-related APIs
+export interface TeamData {
+  teamName: string;
+  members: string[];
 }
 
 export async function createTeam(data: TeamData) {

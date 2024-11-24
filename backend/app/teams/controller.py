@@ -1,19 +1,41 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    status,
+    Depends,
+    FastAPI
+)
 from app.logging.logger import AppLogger
-from app.models.schemas import Teams
+from .models.schemas import (
+    CreateTeamsSchema,
+    DeleteTeamsSchema,
+    GetTeamsSchema,
+    GetAllTeamsSchema,
+    UpdateTeamsSchema
+)
 from app.redis_setting.redis_pool import get_redis_client
 import redis
 import json
-from typing import List
+from typing import (
+    List
+)
 
 logger = AppLogger().get_logger()
 
-router  = APIRouter()
+router = APIRouter()
 
 
 # Endpoint para registrar uma nova equipe de manutenção
-@router.post("/teams", tags=["Teams Manager"], response_model=Teams, status_code=status.HTTP_201_CREATED)
-def register_teams_on_maintenance(register_teams_on_maintenance: Teams, redis_client: redis.Redis = Depends(get_redis_client)) -> Teams:
+@router.post(
+    "/teams",
+    tags=["Teams Manager"],
+    response_model=CreateTeamsSchema,
+    status_code=status.HTTP_201_CREATED
+)
+def register_teams_on_maintenance(
+    register_teams_on_maintenance: CreateTeamsSchema,
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> CreateTeamsSchema:
     logger.info("Registrando nova equipe de manutenção")
     team_id = f"team:{register_teams_on_maintenance.name}"
 
@@ -33,9 +55,16 @@ def register_teams_on_maintenance(register_teams_on_maintenance: Teams, redis_cl
 
     return register_teams_on_maintenance
 
+
 # Endpoint para obter todas as equipes registradas
-@router.get("/teams", tags=["Teams Manager"], response_model=List[Teams])
-def get_teams(redis_client: redis.Redis = Depends(get_redis_client)) -> List[Teams]:
+@router.get(
+    "/teams",
+    tags=["Teams Manager"],
+    response_model=List[GetAllTeamsSchema]
+)
+def get_teams(
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> List[GetAllTeamsSchema]:
     logger.info("Obtendo todas as equipes de manutenção")
 
     try:
@@ -51,7 +80,7 @@ def get_teams(redis_client: redis.Redis = Depends(get_redis_client)) -> List[Tea
                     if not isinstance(team_data_dict, dict):
                         raise ValueError(f"Formato inválido de dados: {team_data_dict}")
 
-                    teams_list.append(Teams(**team_data_dict))
+                    teams_list.append(CreateTeamsSchema(**team_data_dict))
 
                 except (json.JSONDecodeError, ValueError) as e:
                     logger.error(f"Erro ao decodificar os dados da equipe: {str(e)}")
@@ -61,9 +90,17 @@ def get_teams(redis_client: redis.Redis = Depends(get_redis_client)) -> List[Tea
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
+
 # Endpoint para obter uma equipe específica pelo nome
-@router.get("/teams/{team_name}", tags=["Teams Manager"], response_model=Teams)
-def get_team_by_name(team_name: str, redis_client: redis.Redis = Depends(get_redis_client)) -> Teams:
+@router.get(
+    "/teams/{team_name}",
+    tags=["Teams Manager"],
+    response_model=GetTeamsSchema
+)
+def get_team_by_name(
+    team_name: str,
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> GetTeamsSchema:
     logger.info(f"Obtendo equipe com nome: {team_name}")
     team_id = f"team:{team_name}"
 
@@ -82,14 +119,24 @@ def get_team_by_name(team_name: str, redis_client: redis.Redis = Depends(get_red
         except (json.JSONDecodeError, ValueError) as e:
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da equipe: {str(e)}")
 
-        return Teams(**team_data_dict)
+        return GetTeamsSchema(**team_data_dict)
 
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
+
 # Endpoint para atualizar dados de uma equipe
-@router.put("/teams/{team_name}", tags=["Teams Manager"], status_code=status.HTTP_202_ACCEPTED, response_model=Teams)
-def update_team(team_name: str, team_update: Teams, redis_client: redis.Redis = Depends(get_redis_client)) -> Teams:
+@router.put(
+    "/teams/{team_name}",
+    tags=["Teams Manager"],
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model=UpdateTeamsSchema
+)
+def update_team(
+    team_name: str,
+    team_update: UpdateTeamsSchema,
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> UpdateTeamsSchema:
     logger.info(f"Atualizando dados da equipe com nome: {team_name}")
     team_id = f"team:{team_name}"
 
@@ -114,14 +161,22 @@ def update_team(team_name: str, team_update: Teams, redis_client: redis.Redis = 
         # Atualizar os dados da equipe no Redis
         redis_client.set(team_id, team_data_json)
 
-        return Teams(**team_data_dict)
+        return UpdateTeamsSchema(**team_data_dict)
 
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
+
 # Endpoint para remover uma equipe
-@router.delete("/teams/{team_name}", tags=["Teams Manager"], status_code=status.HTTP_204_NO_CONTENT)
-def delete_team(team_name: str, redis_client: redis.Redis = Depends(get_redis_client)):
+@router.delete(
+    "/teams/{team_name}",
+    tags=["Teams Manager"],
+    
+)
+def delete_team(
+    team_name: str,
+    redis_client: redis.Redis = Depends(get_redis_client)
+):
     logger.info(f"Removendo equipe com nome: {team_name}")
     team_id = f"team:{team_name}"
 
@@ -138,4 +193,9 @@ def delete_team(team_name: str, redis_client: redis.Redis = Depends(get_redis_cl
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
-    return None
+
+# Função para configurar o roteador no aplicativo FastAPI
+def configure(
+    app: FastAPI
+):
+    app.include_router(router)

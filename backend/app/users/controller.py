@@ -1,20 +1,56 @@
-from app.redis_setting.redis_pool import redis_client
-from app.auther.auth  import verify_password, SECRET_KEY, ALGORITHM, oauth2_scheme, create_access_token, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.redis_setting.redis_pool import (
+    redis_client
+)
+from app.auther.auth import (
+    verify_password,
+    SECRET_KEY,
+    ALGORITHM,
+    oauth2_scheme,
+    create_access_token,
+    get_password_hash,
+    ACCESS_TOKEN_EXPIRE_MINUTES
+)
 import json
-from fastapi import Depends, HTTPException, status, APIRouter
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
+from fastapi import (
+    Depends,
+    HTTPException,
+    status,
+    APIRouter
+)
+from fastapi.security import (
+    OAuth2PasswordRequestForm
+)
+from jose import (
+    JWTError,
+    jwt
+)
 from app.logging.logger import AppLogger
-from app.models.schemas import TokenData, CreateUserAccount, ManageUsersPermissions, Token
-from datetime import datetime, timedelta
-from app.redis_setting.redis_pool import redis_client, get_redis_client
+from .models.schemas import (
+    TokenData,
+    CreateUserSchema,
+    LoginUserSchema,
+    ManageUsersPermissions,
+    Token
+)
+from datetime import (
+    datetime,
+    timedelta
+)
+from app.redis_setting.redis_pool import (
+    redis_client,
+    get_redis_client
+)
 import redis
-from fastapi import APIRouter
+from fastapi import (
+    APIRouter,
+    FastAPI
+)
 
 
 router = APIRouter()
 
 logger = AppLogger().get_logger()
+
 
 # Função para obter o usuário
 def get_user(username: str):
@@ -23,6 +59,7 @@ def get_user(username: str):
     if user_data:
         return json.loads(user_data.decode('utf-8'))
     return None
+
 
 # Função para autenticar o usuário
 def authenticate_user(username: str, password: str):
@@ -33,8 +70,11 @@ def authenticate_user(username: str, password: str):
         return False
     return user
 
+
 # Função para obter o usuário atual
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(
+    token: str = Depends(oauth2_scheme)
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Não foi possível validar as credenciais",
@@ -53,8 +93,17 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
-@router.post("/users", tags=["User Management"], status_code=status.HTTP_201_CREATED, response_model=CreateUserAccount)
-def create_user(user: CreateUserAccount, redis_client: redis.Redis = Depends(get_redis_client)) -> CreateUserAccount:
+
+@router.post(
+    "/users",
+    tags=["User Management"],
+    status_code=status.HTTP_201_CREATED,
+    response_model=CreateUserSchema
+)
+def create_user(
+    user: CreateUserSchema,
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> CreateUserSchema:
     logger.info(f"Criando novo usuário: {user.username}")
     user_id = f"user:{user.username}"
 
@@ -75,9 +124,17 @@ def create_user(user: CreateUserAccount, redis_client: redis.Redis = Depends(get
 
     return user
 
+
 # Endpoint para fazer login e obter o token de acesso
-@router.post("/token", tags=["User Management"], response_model=Token)
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), redis_client: redis.Redis = Depends(get_redis_client)) -> Token:
+@router.post(
+    "/token",
+    tags=["User Management"],
+    response_model=Token
+)
+def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> Token:
     logger.info(f"Usuário tentando fazer login: {form_data.username}")
     user_id = f"user:{form_data.username}"
 
@@ -116,9 +173,20 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), red
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
+
 # Endpoint para gerenciar permissões de usuário
-@router.put("/users/{username}/permissions", tags=["User Management"], status_code=status.HTTP_202_ACCEPTED, response_model=ManageUsersPermissions)
-def manage_user_permissions(username: str, permissions: ManageUsersPermissions, redis_client: redis.Redis = Depends(get_redis_client), current_user: dict = Depends(get_current_user)) -> ManageUsersPermissions:
+@router.put(
+    "/users/{username}/permissions",
+    tags=["User Management"],
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model=ManageUsersPermissions
+)
+def manage_user_permissions(
+    username: str,
+    permissions: ManageUsersPermissions,
+    redis_client: redis.Redis = Depends(get_redis_client),
+    current_user: dict = Depends(get_current_user)
+) -> ManageUsersPermissions:
     logger.info(f"Gerenciando permissões para o usuário: {username}")
     user_id = f"user:{username}"
 
@@ -145,3 +213,9 @@ def manage_user_permissions(username: str, permissions: ManageUsersPermissions, 
 
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
+
+
+def configure(
+    app: FastAPI
+):
+    app.include_router(router)

@@ -113,7 +113,7 @@ def create_user(
             raise HTTPException(status_code=400, detail="Usuário já registrado.")
 
         # Criptografando a senha e salvando os dados do usuário
-        user_data = user.model_dump()
+        user_data = user.dict()
         user_data["password"] = get_password_hash(user.password)
         user_data_json = json.dumps(user_data)
         redis_client.set(user_id, user_data_json)

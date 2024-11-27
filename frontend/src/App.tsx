@@ -1,47 +1,43 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '@/components/auth-provider';
-import Layout from '@/components/layout';
-import Login from '@/pages/login';
-import Dashboard from '@/pages/dashboard';
-import Machines from '@/pages/machines';
-import Parts from '@/pages/parts';
-import Teams from '@/pages/teams';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { Layout } from './components/Layout';
+import { LoginPage } from './pages/LoginPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { MachinesPage } from './pages/MachinesPage';
+import { MaintenancePage } from './pages/MaintenancePage';
+import { PartsPage } from './pages/PartsPage';
+import { TeamsPage } from './pages/TeamsPage';
+import { useAuthStore } from './store/authStore';
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { token } = useAuthStore();
+  return token ? <>{children}</> : <Navigate to="/login" />;
 }
 
 function App() {
-  const { isAuthenticated } = useAuth();
-
   return (
-    <Routes>
-      <Route 
-        path="/login" 
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
-      />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="machines" element={<Machines />} />
-        <Route path="parts" element={<Parts />} />
-        <Route path="teams" element={<Teams />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+    <BrowserRouter>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="machines" element={<MachinesPage />} />
+          <Route path="maintenance" element={<MaintenancePage />} />
+          <Route path="parts" element={<PartsPage />} />
+          <Route path="teams" element={<TeamsPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

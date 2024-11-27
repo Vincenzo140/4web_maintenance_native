@@ -41,7 +41,7 @@ def machine_register(
         if redis_client.exists(machine_id):
             raise HTTPException(status_code=400, detail="Máquina já registrada.")
 
-        machine_data = machine_create.model_dump()
+        machine_data = machine_create.dict()
         machine_data_json = json.dumps(machine_data)
         redis_client.set(machine_id, machine_data_json)
         redis_client.sadd("machines_list", machine_id)
@@ -140,7 +140,7 @@ def update_machine(
         except (json.JSONDecodeError, ValueError) as e:
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da máquina: {str(e)}")
 
-        machine_data_dict.update(machine_update.model_dump())
+        machine_data_dict.update(machine_update.dict())
         machine_data_json = json.dumps(machine_data_dict)
         redis_client.set(machine_id, machine_data_json)
         return CreateMachinesSchema(**machine_data_dict)

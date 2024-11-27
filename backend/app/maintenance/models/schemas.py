@@ -1,5 +1,5 @@
 from pydantic import BaseModel 
-from typing import  Optional
+from typing import Optional, List
 from datetime import date
 
 
@@ -9,7 +9,7 @@ class CreateMaintenanceSchema(BaseModel):
     problem_description: str
     request_date: date
     priority: str
-    assigned_team: str
+    assigned_team_id: str  # This field will store the team ID
     status: str
     machine_id: str
 
@@ -17,7 +17,7 @@ class UpdateMaintenanceSchema(BaseModel):
     problem_description: Optional[str] = None
     request_date: Optional[date] = None
     priority: Optional[str] = None
-    assigned_team: Optional[str] = None
+    assigned_team_id: Optional[str] = None
     status: Optional[str] = None
     machine_id: Optional[str] = None
 
@@ -26,7 +26,18 @@ class DeleteMaintenanceSchema(BaseModel):
 
 class GetMaintenanceSchema(BaseModel):
     maintenance_register_id: int
+    problem_description: str
+    request_date: date
+    priority: str
+    assigned_team_id: str
+    status: str
+    machine_id: str
 
 class GetAllMaintenanceSchema(BaseModel):
-    limit: Optional[int] = None
-    offset: Optional[int] = None
+    maintenance_register_id: int
+    problem_description: str
+    request_date: date
+    priority: str
+    assigned_team_id: str
+    status: str
+    machine_id: str

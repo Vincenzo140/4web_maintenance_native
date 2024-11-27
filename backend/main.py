@@ -38,17 +38,17 @@ def create_app() -> FastAPI:
             "version": app.version,
             "description": app.description,
         }
-
+        
     # Importando e registrando os roteadores
     from app.machines import controller as machine_router
     from app.maintenance import controller as maintenance_router
-    from app.parts import controller as parts_router
+    # from app.parts import controller as parts_router
     from app.teams import controller as teams_router
     from app.users import controller as users_route
 
     machine_router.configure(app)
     maintenance_router.configure(app)
-    parts_router.configure(app)
+    # parts_router.configure(app)
     teams_router.configure(app)
     users_route.configure(app)
 

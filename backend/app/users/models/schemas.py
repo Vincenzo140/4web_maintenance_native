@@ -13,7 +13,6 @@ class LoginUserSchema(BaseModel):
 class CreateUserSchema(BaseModel):
     username: str
     password: str
-    role: str
 
 
 class ManageUsersPermissions(BaseModel):

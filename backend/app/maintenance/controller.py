@@ -24,8 +24,7 @@ router = APIRouter()
 )
 def maintenance_register(
     maintenance_create: CreateMaintenanceSchema,
-    redis_client: redis.Redis = Depends(get_redis_client)
-) -> CreateMaintenanceSchema:
+    redis_client: redis.Redis = Depends(get_redis_client)) -> CreateMaintenanceSchema:
     logger.info(f"Criando uma nova manutenção {maintenance_create.maintenance_register_id}")
 
     maintenance_id = f"maintenance:{maintenance_create.maintenance_register_id}"
@@ -36,7 +35,12 @@ def maintenance_register(
             raise HTTPException(status_code=400, detail="Manutenção já registrada.")
 
         # Salvando os dados da manutenção
-        maintenance_data = maintenance_create.model_dump()
+        maintenance_data = maintenance_create.dict()
+
+        # Verificar se o assigned_team é um ID válido de equipe
+        team_id = maintenance_create.assigned_team_id
+        if not redis_client.exists(team_id):
+            raise HTTPException(status_code=400, detail="Equipe atribuída não encontrada.")
         maintenance_data['request_date'] = maintenance_data['request_date'].isoformat()
         maintenance_data_json = json.dumps(maintenance_data)
         redis_client.set(maintenance_id, maintenance_data_json)
@@ -72,12 +76,12 @@ def get_maintenance(
                     if not isinstance(maintenance_data_dict, dict):
                         raise ValueError(f"Formato inválido de dados: {maintenance_data_dict}")
 
-                    maintenance_obj = CreateMaintenanceSchema(**maintenance_data_dict)
+                    maintenance_obj = GetAllMaintenanceSchema(**maintenance_data_dict)
                     if machine_id is None or maintenance_obj.machine_id == machine_id:
                         maintenance_list.append(maintenance_obj)
 
                 except (json.JSONDecodeError, ValueError) as e:
-                    logger.error(f"Erro ao decodificar os dados da manutenção: {str(e)}")
+                    logger.error(f"Erro ao decodificar os dados da manutenção: {str(e)}", exc_info=True)
 
         return maintenance_list
 
@@ -110,7 +114,7 @@ def get_maintenance_by_id(
         except (json.JSONDecodeError, ValueError) as e:
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da manutenção: {str(e)}")
 
-        return CreateMaintenanceSchema(**maintenance_data_dict)
+        return GetMaintenanceSchema(**maintenance_data_dict)
 
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
@@ -143,13 +147,19 @@ def update_maintenance(
         except (json.JSONDecodeError, ValueError) as e:
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da manutenção: {str(e)}")
 
-        maintenance_data_dict.update(maintenance_update.model_dump())
-        maintenance_data_dict['request_date'] = maintenance_data_dict['request_date'].isoformat()
+        if maintenance_update.assigned_team_id:
+            team_id = maintenance_update.assigned_team_id
+            if not redis_client.exists(team_id):
+                raise HTTPException(status_code=400, detail="Equipe atribuída não encontrada.")
+        
+        maintenance_data_dict.update(maintenance_update.dict(exclude_unset=True))
+        if maintenance_data_dict.get('request_date'):
+            maintenance_data_dict['request_date'] = maintenance_data_dict['request_date'].isoformat()
         maintenance_data_json = json.dumps(maintenance_data_dict)
 
         redis_client.set(maintenance_id, maintenance_data_json)
 
-        return CreateMaintenanceSchema(**maintenance_data_dict)
+        return UpdateMaintenanceSchema(**maintenance_data_dict)
 
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
@@ -159,12 +169,13 @@ def update_maintenance(
 @router.delete(
     "/maintenance/{maintenance_register_id}",
     tags=["Maintenance Manage"],
-    response_model=DeleteMaintenanceSchema
+    response_model=DeleteMaintenanceSchema,
+    status_code=status.HTTP_200_OK
 )
 def delete_maintenance(
     maintenance_register_id: str,
     redis_client: redis.Redis = Depends(get_redis_client)
-):
+) -> DeleteMaintenanceSchema:
     logger.info(f"Removendo manutenção com número de registro: {maintenance_register_id}")
     maintenance_id = f"maintenance:{maintenance_register_id}"
 
@@ -179,7 +190,7 @@ def delete_maintenance(
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
-    return None
+    return DeleteMaintenanceSchema(maintenance_register_id=maintenance_register_id)
 
 
 def configure(app: FastAPI):

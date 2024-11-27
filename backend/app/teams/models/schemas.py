@@ -4,11 +4,11 @@ from typing import (
     Union,
     Optional
 )
-from enum import Enum
 
 
 # Schema CRUD para Teams
 class CreateTeamsSchema(BaseModel):
+    team_id: Optional[str] = None
     name: str
     members: List[Union[str, int]]
     specialites: List[str]
@@ -29,5 +29,7 @@ class GetTeamsSchema(BaseModel):
 
 
 class GetAllTeamsSchema(BaseModel):
-    limit: Optional[int] = None
-    offset: Optional[int] = None
+    team_id: str
+    name: str
+    members: List[Union[str, int]]
+    specialites: List[str]

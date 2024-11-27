@@ -9,8 +9,8 @@ from app.logging.logger import AppLogger
 from .models.schemas import (
     CreateTeamsSchema,
     DeleteTeamsSchema,
-    GetTeamsSchema,
     GetAllTeamsSchema,
+    GetTeamsSchema,
     UpdateTeamsSchema
 )
 from app.redis_setting.redis_pool import get_redis_client
@@ -29,13 +29,13 @@ router = APIRouter()
 @router.post(
     "/teams",
     tags=["Teams Manager"],
-    response_model=CreateTeamsSchema,
+    response_model=GetTeamsSchema,
     status_code=status.HTTP_201_CREATED
 )
 def register_teams_on_maintenance(
     register_teams_on_maintenance: CreateTeamsSchema,
     redis_client: redis.Redis = Depends(get_redis_client)
-) -> CreateTeamsSchema:
+) -> GetTeamsSchema:
     logger.info("Registrando nova equipe de manutenção")
     team_id = f"team:{register_teams_on_maintenance.name}"
 
@@ -45,7 +45,8 @@ def register_teams_on_maintenance(
             raise HTTPException(status_code=400, detail="Equipe já registrada.")
 
         # Salvando os dados da equipe
-        team_data = register_teams_on_maintenance.model_dump()
+        team_data = register_teams_on_maintenance.dict()
+        team_data['team_id'] = team_id
         team_data_json = json.dumps(team_data)
         redis_client.set(team_id, team_data_json)
         redis_client.sadd("teams_list", team_id)
@@ -53,7 +54,7 @@ def register_teams_on_maintenance(
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
-    return register_teams_on_maintenance
+    return GetTeamsSchema(team_id=team_id)
 
 
 # Endpoint para obter todas as equipes registradas
@@ -80,7 +81,8 @@ def get_teams(
                     if not isinstance(team_data_dict, dict):
                         raise ValueError(f"Formato inválido de dados: {team_data_dict}")
 
-                    teams_list.append(CreateTeamsSchema(**team_data_dict))
+                    team_data_dict['team_id'] = key.decode('utf-8')
+                    teams_list.append(GetAllTeamsSchema(**team_data_dict))
 
                 except (json.JSONDecodeError, ValueError) as e:
                     logger.error(f"Erro ao decodificar os dados da equipe: {str(e)}")
@@ -119,7 +121,7 @@ def get_team_by_name(
         except (json.JSONDecodeError, ValueError) as e:
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da equipe: {str(e)}")
 
-        return GetTeamsSchema(**team_data_dict)
+        return GetTeamsSchema(team_id=team_id)
 
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
@@ -170,8 +172,7 @@ def update_team(
 # Endpoint para remover uma equipe
 @router.delete(
     "/teams/{team_name}",
-    tags=["Teams Manager"],
-    
+    tags=["Teams Manager"]
 )
 def delete_team(
     team_name: str,
@@ -199,3 +200,5 @@ def configure(
     app: FastAPI
 ):
     app.include_router(router)
+
+

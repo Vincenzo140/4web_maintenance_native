@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Union, Literal, Optional
-from datetime import datetime
+from typing import List, Optional
 
 
 # Schema CRUD para Machines
@@ -29,8 +28,10 @@ class GetMachinesSchema(BaseModel):
     machine_id: str
 
 class GetAllMachinesSchema(BaseModel):
-    start_date: Optional [datetime] = Field(None, description="This provides the start date")
-    end_date: Optional [datetime] = Field(None, description="This provides the end date")
-    limit: Optional[int] = None
-    offset: Optional[int] = None
-    
+    name: str
+    type: str
+    model: str
+    serial_number: str
+    location: str
+    maintenance_history: List[str]
+    status: str

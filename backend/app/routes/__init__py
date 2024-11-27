@@ -1,5 +1,0 @@
-from .machines import router as machine_router
-from .maintenance import router as maintenance_router
-from .parts import router as parts_router
-from .teams import router as teams_router
-from .users import router as users_router

@@ -1,11 +1,8 @@
-
 from redis import Redis
 import redis
 from tenacity import retry, stop_after_attempt, wait_exponential
 from fastapi import HTTPException
 import json
-
-redis_client = redis.Redis(host='localhost', port=6379, db=0)
 
 pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
 

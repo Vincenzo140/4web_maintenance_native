@@ -1,6 +1,3 @@
-from app.redis_setting.redis_pool import (
-    redis_client
-)
 from app.auther.auth import (
     verify_password,
     SECRET_KEY,
@@ -37,7 +34,6 @@ from datetime import (
     timedelta
 )
 from app.redis_setting.redis_pool import (
-    redis_client,
     get_redis_client
 )
 import redis
@@ -50,6 +46,8 @@ from fastapi import (
 router = APIRouter()
 
 logger = AppLogger().get_logger()
+
+redis_client = redis.ConnectionPool(host='localhost', port=6379, db=0)
 
 
 # Função para obter o usuário

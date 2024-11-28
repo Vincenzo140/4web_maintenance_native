@@ -3,8 +3,9 @@ import redis
 from tenacity import retry, stop_after_attempt, wait_exponential
 from fastapi import HTTPException
 import json
+from config import Config
 
-pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
+pool = redis.ConnectionPool(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=Config.REDIS_DB)
 
 def get_redis_client():
     return redis.Redis(connection_pool=pool)

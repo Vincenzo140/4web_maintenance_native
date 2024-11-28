@@ -57,7 +57,9 @@ def register_teams_on_maintenance(
     return GetTeamsSchema(team_id=team_id)
 
 
+
 # Endpoint para obter todas as equipes registradas
+
 @router.get(
     "/teams",
     tags=["Teams Manager"],

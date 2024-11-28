@@ -11,6 +11,9 @@ services:
       - .:/app
     depends_on:
       - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     networks:
       - app-network
 
@@ -30,7 +33,7 @@ services:
     container_name: frontend-app
     environment:
       - FRONTEND_ENV=production
-      - VITE_BACKEND_API_URL=http://localhost:8000
+      - VITE_BACKEND_API_URL=http://backend:8000  # Use o nome do serviço no Docker Compose
       - VITE_PWD_SIGNUP_ENABLED=true
       - VITE_GA_TRACKING_ID=your-ga-tracking-id
     ports:

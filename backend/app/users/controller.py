@@ -47,13 +47,11 @@ router = APIRouter()
 
 logger = AppLogger().get_logger()
 
-redis_client = redis.ConnectionPool(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=Config.REDIS_DB)
-
 
 # Função para obter o usuário
 def get_user(username: str):
     user_id = f"user:{username}"
-    user_data = redis_client.get(user_id)
+    user_data = get_redis_client.get(user_id)
     if user_data:
         return json.loads(user_data.decode('utf-8'))
     return None

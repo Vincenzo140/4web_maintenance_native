@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { SignUp } from '../services/api';
 
@@ -15,14 +15,14 @@ export function SignUpPage() {
       await SignUp(username, password, email); // Passa os argumentos individualmente
       localStorage.setItem('username', username);
       toast.success('Cadastro realizado com sucesso!');
-      
+
       setTimeout(() => {
         navigate('/login');
       }, 100);
     } catch (error) {
       toast.error('Cadastro falhou.');
     }
-  };  
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -75,6 +75,19 @@ export function SignUpPage() {
             Cadastrar
           </button>
         </form>
+
+        {/* Botão para redirecionar para login */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-700">
+            Já tem uma conta?{' '}
+            <Link
+              to="/login"
+              className="text-blue-500 hover:underline"
+            >
+              Faça login aqui
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { login } from '../services/api';
 import { useAuthStore } from '../store/authStore';
@@ -15,8 +15,6 @@ export function LoginPage() {
     try {
       const token = await login(username, password);
       setToken(token);
-      setUsername(username);
-      console.log('Username set to:', username); // Log para depuração
       localStorage.setItem('auth_token', JSON.stringify(token));
       localStorage.setItem('username', username);
 
@@ -28,12 +26,11 @@ export function LoginPage() {
       toast.error('Login failed. Please check your credentials.');
     }
   };
-  
-  
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h1 className="text-2xl font-bold mb-6 text-center">Machine Management System</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
@@ -68,6 +65,19 @@ export function LoginPage() {
             Login
           </button>
         </form>
+
+        {/* Botão para redirecionar para o cadastro */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-700">
+            Não tem uma conta?{' '}
+            <Link
+              to="/signup"
+              className="text-blue-500 hover:underline"
+            >
+              Clique aqui para criar
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

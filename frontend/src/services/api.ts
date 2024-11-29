@@ -1,7 +1,18 @@
-import { AuthToken } from '../types';
+import { AuthToken } from "../types";
 
+/**
+ * API base URL for making HTTP requests.
+ */
 const API_URL = 'http://localhost:8000';
 
+/**
+ * Authenticates a user by sending their credentials to the login endpoint.
+ *
+ * @param username - The username of the user trying to log in.
+ * @param password - The password of the user trying to log in.
+ * @returns A promise that resolves to an AuthToken object containing the authentication token.
+ * @throws An error if the login request fails, with a message from the server response or a default message.
+ */
 export async function login(username: string, password: string): Promise<AuthToken> {
   const formData = new FormData();
   formData.append('username', username);
@@ -20,6 +31,14 @@ export async function login(username: string, password: string): Promise<AuthTok
   return response.json();
 }
 
+/**
+ * Makes an authenticated API request to a specified endpoint.
+ *
+ * @param endpoint - The API endpoint to send the request to.
+ * @param options - Optional settings for the request, such as method and headers.
+ * @returns A promise that resolves to the response data, which could be an object, array, or null (for DELETE requests).
+ * @throws An error if the request fails, with a message from the server response or a default message.
+ */
 export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   const storedToken = localStorage.getItem('auth_token');
   const token = storedToken ? JSON.parse(storedToken) : null;
@@ -68,7 +87,12 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
   }
 }
 
-// Helper function to ensure arrays
+/**
+ * Helper function to ensure that the returned data is always an array.
+ *
+ * @param data - The data to be checked, which could be a single item, an array, or null/undefined.
+ * @returns An array of items, ensuring that single items are wrapped in an array and null/undefined returns an empty array.
+ */
 export function ensureArray<T>(data: T | T[] | null | undefined): T[] {
   if (!data) return [];
   return Array.isArray(data) ? data : [data];

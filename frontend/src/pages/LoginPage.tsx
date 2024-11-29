@@ -15,6 +15,8 @@ export function LoginPage() {
     try {
       const token = await login(username, password);
       setToken(token);
+      setUsername(username);  // Aqui deve definir o username no estado global
+      console.log('Username set to:', username); // Log para depuração
       localStorage.setItem('auth_token', JSON.stringify(token));
       navigate('/machines');
       toast.success('Login successful!');
@@ -22,7 +24,7 @@ export function LoginPage() {
       toast.error('Login failed. Please check your credentials.');
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">

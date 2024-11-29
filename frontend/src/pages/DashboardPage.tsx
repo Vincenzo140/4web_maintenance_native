@@ -20,6 +20,11 @@ interface Stats {
 
 export function DashboardPage() {
   const { username } = useAuthStore();
+  
+  useEffect(() => {
+    console.log('Username in DashboardPage:', username);
+  }, [username]);
+
   const [stats, setStats] = useState<Stats>({
     machines: 0,
     teams: 0,

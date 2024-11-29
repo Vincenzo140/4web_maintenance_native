@@ -31,6 +31,27 @@ export async function login(username: string, password: string): Promise<AuthTok
   return response.json();
 }
 
+export async function SignUp(username: string, password: string, email: string): Promise<AuthToken> {
+  const formData = new FormData();
+  formData.append('username', username);
+  formData.append('password', password);
+  formData.append('email', email);
+
+  const response = await fetch(`${API_URL}/CreateUserAccount`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.detail || 'Criação de Conta failed');
+  }
+
+  return response.json();
+}
+
+
+
 /**
  * Makes an authenticated API request to a specified endpoint.
  *

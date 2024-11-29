@@ -11,10 +11,10 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,
-  username: localStorage.getItem('username') || null, // Recuperar do localStorage
+  username: localStorage.getItem('username') || null, // Recupera do localStorage durante a inicialização
   setToken: (token) => set({ token }),
   setUsername: (username) => {
-    localStorage.setItem('username', username); // Salvar também no localStorage
+    localStorage.setItem('username', username);
     set({ username });
   },
   logout: () => {

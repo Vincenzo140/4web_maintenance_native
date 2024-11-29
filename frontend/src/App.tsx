@@ -9,18 +9,33 @@ import { MaintenancePage } from './pages/MaintenancePage';
 import { PartsPage } from './pages/PartsPage';
 import { TeamsPage } from './pages/TeamsPage';
 import { useAuthStore } from './store/authStore';
+import { SignUpPage } from './pages/SignUpPage';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token } = useAuthStore();
-  return token ? <>{children}</> : <Navigate to="/login" />;
+  return token ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
 function App() {
+  const { token } = useAuthStore();
+
   return (
     <BrowserRouter>
       <Toaster position="top-right" />
       <Routes>
+        {/* Redirecionamento inicial para signup */}
+        <Route
+          path="/"
+          element={<Navigate to={token ? "/dashboard" : "/signup"} replace />}
+        />
+
+        {/* Rota para Signup */}
+        <Route path="/signup" element={<SignUpPage />} />
+
+        {/* Rota para Login */}
         <Route path="/login" element={<LoginPage />} />
+
+        {/* Rotas Protegidas */}
         <Route
           path="/"
           element={
@@ -29,8 +44,7 @@ function App() {
             </PrivateRoute>
           }
         >
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="machines" element={<MachinesPage />} />
           <Route path="maintenance" element={<MaintenancePage />} />
           <Route path="parts" element={<PartsPage />} />

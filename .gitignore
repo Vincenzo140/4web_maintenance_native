@@ -111,3 +111,58 @@ ruff_cache/
 *.tmp
 *~
 /__pycache__
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+.babelrc
+
+# Expo
+.expo/
+.expo-shared/
+
+# TypeScript
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+
+# Watchman
+.watchmanconfig
+
+# Android/IntelliJ
+android/.gradle/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+android/output.json
+
+# iOS/Xcode
+ios/Pods/
+ios/*.xcodeproj/
+ios/*.xcworkspace/
+ios/build/
+ios/DerivedData/
+ios/*.plist
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Misc
+*.swp
+*.swo
+*.tmp
+*.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

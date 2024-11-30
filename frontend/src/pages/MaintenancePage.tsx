@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PlusIcon } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid'; // Importa uuid
 import { Table } from '../components/ui/Table';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
@@ -15,7 +16,7 @@ export function MaintenancePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState<Maintenance | null>(null);
   const [formData, setFormData] = useState<Partial<Maintenance>>({
-    maintenance_register_id: 0,
+    maintenance_register_id: '',
     problem_description: '',
     request_date: new Date().toISOString().split('T')[0],
     priority: '',
@@ -24,20 +25,20 @@ export function MaintenancePage() {
     machine_id: '',
   });
 
+  // Fetch inicial de dados
   useEffect(() => {
-    Promise.all([
-      fetchMaintenanceRecords(),
-      fetchMachines(),
-      fetchTeams(),
-    ]).finally(() => setIsLoading(false));
+    Promise.all([fetchMaintenanceRecords(), fetchMachines(), fetchTeams()]).finally(() =>
+      setIsLoading(false)
+    );
   }, []);
 
+  // Atualiza o formulário ao selecionar uma manutenção
   useEffect(() => {
     if (selectedMaintenance) {
       setFormData(selectedMaintenance);
     } else {
       setFormData({
-        maintenance_register_id: 0,
+        maintenance_register_id: '', // Mantém vazio até gerar um novo UUID no modal
         problem_description: '',
         request_date: new Date().toISOString().split('T')[0],
         priority: '',
@@ -79,19 +80,20 @@ export function MaintenancePage() {
     e.preventDefault();
     try {
       const method = selectedMaintenance ? 'PUT' : 'POST';
-      const endpoint = selectedMaintenance 
+      const endpoint = selectedMaintenance
         ? `/maintenance/${selectedMaintenance.maintenance_register_id}`
         : '/maintenance';
 
       const payload = {
-        maintenance_register_id: formData.maintenance_register_id || 0,
+        maintenance_register_id: formData.maintenance_register_id,
         problem_description: formData.problem_description || '',
         request_date: formData.request_date || new Date().toISOString().split('T')[0],
         priority: formData.priority || '',
-        assigned_team_id: formData.assigned_team_id || '',
+        assigned_team_id: formData.assigned_team_id || '', // Deve ser preenchido
         status: formData.status || '',
         machine_id: formData.machine_id || '',
       };
+        
 
       await fetchWithAuth(endpoint, {
         method,
@@ -101,12 +103,16 @@ export function MaintenancePage() {
         body: JSON.stringify(payload),
       });
 
-      toast.success(`Maintenance record ${selectedMaintenance ? 'updated' : 'created'} successfully`);
+      toast.success(
+        `Maintenance record ${selectedMaintenance ? 'updated' : 'created'} successfully`
+      );
       setIsModalOpen(false);
       fetchMaintenanceRecords();
     } catch (error) {
       console.error('Error submitting maintenance:', error);
-      toast.error(`Failed to ${selectedMaintenance ? 'update' : 'create'} maintenance record`);
+      toast.error(
+        `Failed to ${selectedMaintenance ? 'update' : 'create'} maintenance record`
+      );
     }
   };
 
@@ -125,20 +131,20 @@ export function MaintenancePage() {
   };
 
   const getMachineNameById = (machineId: string) => {
-    const machine = machines.find(m => m.serial_number === machineId);
+    const machine = machines.find((m) => m.serial_number === machineId);
     return machine ? `${machine.name} (${machine.serial_number})` : machineId;
   };
 
   const columns = [
-    { 
+    {
       header: 'Machine',
       accessor: 'machine_id' as keyof Maintenance,
-      render: (machineId: string) => getMachineNameById(machineId)
+      render: (machineId: string) => getMachineNameById(machineId),
     },
     { header: 'Problem', accessor: 'problem_description' as keyof Maintenance },
     { header: 'Date', accessor: 'request_date' as keyof Maintenance },
     { header: 'Priority', accessor: 'priority' as keyof Maintenance },
-    { 
+    {
       header: 'Team',
       accessor: 'assigned_team_id' as keyof Maintenance,
     },
@@ -161,6 +167,15 @@ export function MaintenancePage() {
         <Button
           onClick={() => {
             setSelectedMaintenance(null);
+            setFormData({
+              maintenance_register_id: uuidv4(), // Gera um novo UUID ao abrir o modal
+              problem_description: '',
+              request_date: new Date().toISOString().split('T')[0],
+              priority: '',
+              assigned_team_id: '',
+              status: '',
+              machine_id: '',
+            });
             setIsModalOpen(true);
           }}
         >
@@ -210,7 +225,9 @@ export function MaintenancePage() {
             <label className="block text-sm font-medium text-gray-700">Problem Description</label>
             <textarea
               value={formData.problem_description || ''}
-              onChange={(e) => setFormData({ ...formData, problem_description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, problem_description: e.target.value })
+              }
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               rows={3}
               required

@@ -15,7 +15,6 @@ import redis
 logger = AppLogger().get_logger()
 router = APIRouter()
 
-# Endpoint para registrar uma nova manutenção
 @router.post(
     "/maintenance",
     tags=["Maintenance Manage"],
@@ -24,24 +23,24 @@ router = APIRouter()
 )
 def maintenance_register(
     maintenance_create: CreateMaintenanceSchema,
-    redis_client: redis.Redis = Depends(get_redis_client)) -> CreateMaintenanceSchema:
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> CreateMaintenanceSchema:
     logger.info(f"Criando uma nova manutenção {maintenance_create.maintenance_register_id}")
 
     maintenance_id = f"maintenance:{maintenance_create.maintenance_register_id}"
 
     try:
-        # Verificando se a manutenção já existe
         if redis_client.exists(maintenance_id):
             raise HTTPException(status_code=400, detail="Manutenção já registrada.")
 
-        # Salvando os dados da manutenção
         maintenance_data = maintenance_create.dict()
+        maintenance_data['maintenance_register_id'] = str(maintenance_create.maintenance_register_id)
+        maintenance_data['request_date'] = maintenance_data['request_date'].isoformat()
 
-        # Verificar se o assigned_team é um ID válido de equipe
         team_id = maintenance_create.assigned_team_id
         if not redis_client.exists(team_id):
             raise HTTPException(status_code=400, detail="Equipe atribuída não encontrada.")
-        maintenance_data['request_date'] = maintenance_data['request_date'].isoformat()
+
         maintenance_data_json = json.dumps(maintenance_data)
         redis_client.set(maintenance_id, maintenance_data_json)
         redis_client.sadd("maintenance_list", maintenance_id)
@@ -52,7 +51,6 @@ def maintenance_register(
     return maintenance_create
 
 
-# Endpoint para obter todas as manutenções registradas, com possibilidade de filtrar por máquina
 @router.get(
     "/maintenance",
     tags=["Maintenance Manage"],
@@ -73,8 +71,7 @@ def get_maintenance(
             if maintenance_data:
                 try:
                     maintenance_data_dict = json.loads(maintenance_data.decode('utf-8'))
-                    if not isinstance(maintenance_data_dict, dict):
-                        raise ValueError(f"Formato inválido de dados: {maintenance_data_dict}")
+                    maintenance_data_dict['maintenance_register_id'] = str(maintenance_data_dict.get('maintenance_register_id', ''))
 
                     maintenance_obj = GetAllMaintenanceSchema(**maintenance_data_dict)
                     if machine_id is None or maintenance_obj.machine_id == machine_id:
@@ -87,7 +84,6 @@ def get_maintenance(
 
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
-
 
 # Endpoint para obter uma manutenção específica pelo número de registro
 @router.get(
@@ -118,7 +114,6 @@ def get_maintenance_by_id(
 
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
-
 
 # Endpoint para atualizar dados de uma manutenção
 @router.put(
@@ -164,7 +159,6 @@ def update_maintenance(
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
-
 # Endpoint para remover uma manutenção
 @router.delete(
     "/maintenance/{maintenance_register_id}",
@@ -192,6 +186,6 @@ def delete_maintenance(
 
     return DeleteMaintenanceSchema(maintenance_register_id=maintenance_register_id)
 
-
+# Configuração do FastAPI
 def configure(app: FastAPI):
     app.include_router(router)

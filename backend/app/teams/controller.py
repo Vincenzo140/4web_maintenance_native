@@ -15,6 +15,7 @@ from .models.schemas import (
 )
 from app.redis_setting.redis_pool import get_redis_client
 import redis
+from redis import *
 import json
 from typing import (
     List

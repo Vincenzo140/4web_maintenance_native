@@ -47,13 +47,11 @@ router = APIRouter()
 
 logger = AppLogger().get_logger()
 
-redis_client = redis.ConnectionPool(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=Config.REDIS_DB)
-
 
 # Função para obter o usuário
 def get_user(username: str):
     user_id = f"user:{username}"
-    user_data = redis_client.get(user_id)
+    user_data = get_redis_client.get(user_id)
     if user_data:
         return json.loads(user_data.decode('utf-8'))
     return None
@@ -92,36 +90,36 @@ def get_current_user(
     return user
 
 
+from fastapi import Form
+
 @router.post(
-    "/users",
+    "/CreateUserAccount",
     tags=["User Management"],
-    status_code=status.HTTP_201_CREATED,
-    response_model=CreateUserSchema
+    status_code=status.HTTP_201_CREATED
 )
-def create_user(
-    user: CreateUserSchema,
-    redis_client: redis.Redis = Depends(get_redis_client)
-) -> CreateUserSchema:
-    logger.info(f"Criando novo usuário: {user.username}")
-    user_id = f"user:{user.username}"
+def create_user_account(
+    username: str = Form(...),
+    password: str = Form(...),
+    email: str = Form(...),
+    redis_client: redis.StrictRedis = Depends(get_redis_client)
+):
+    user_id = f"user:{username}"
 
-    try:
-        # Verificando se o usuário já existe
-        if redis_client.exists(user_id):
-            raise HTTPException(status_code=400, detail="Usuário já registrado.")
+    # Verificar duplicidade de usuário ou e-mail
+    if redis_client.get(user_id):
+        raise HTTPException(status_code=400, detail="Usuário já registrado.")
+    if any(
+    u.get("email") == email
+        for v in redis_client.mget(redis_client.keys("user:*")) if v
+        for u in [json.loads(v)] if "email" in u
+    ):
+        raise HTTPException(status_code=400, detail="E-mail já registrado.")
 
-        # Criptografando a senha e salvando os dados do usuário
-        user_data = user.dict()
-        user_data["password"] = get_password_hash(user.password)
-        user_data_json = json.dumps(user_data)
-        redis_client.set(user_id, user_data_json)
-        redis_client.sadd("users_list", user_id)
+    # Criar usuário
+    user_data = {"username": username, "password": get_password_hash(password), "email": email}
+    redis_client.set(user_id, json.dumps(user_data))
 
-    except (ConnectionError, TimeoutError) as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
-
-    return user
-
+    return {"username": username, "email": email}
 
 # Endpoint para fazer login e obter o token de acesso
 @router.post(
@@ -171,46 +169,6 @@ def login_for_access_token(
     except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
-
-# Endpoint para gerenciar permissões de usuário
-@router.put(
-    "/users/{username}/permissions",
-    tags=["User Management"],
-    status_code=status.HTTP_202_ACCEPTED,
-    response_model=ManageUsersPermissions
-)
-def manage_user_permissions(
-    username: str,
-    permissions: ManageUsersPermissions,
-    redis_client: redis.Redis = Depends(get_redis_client),
-    current_user: dict = Depends(get_current_user)
-) -> ManageUsersPermissions:
-    logger.info(f"Gerenciando permissões para o usuário: {username}")
-    user_id = f"user:{username}"
-
-    try:
-        # Buscar os dados do usuário no Redis
-        user_data = redis_client.get(user_id)
-        if not user_data:
-            raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-        # Decodificar os dados do usuário
-        try:
-            user_data_dict = json.loads(user_data.decode('utf-8'))
-            if not isinstance(user_data_dict, dict):
-                raise ValueError(f"Formato inválido de dados: {user_data_dict}")
-        except (json.JSONDecodeError, ValueError) as e:
-            raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados do usuário: {str(e)}")
-
-        # Atualizar as permissões do usuário
-        user_data_dict['permissions'] = permissions.permissions
-        user_data_json = json.dumps(user_data_dict)
-        redis_client.set(user_id, user_data_json)
-
-        return permissions
-
-    except (ConnectionError, TimeoutError) as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao conectar ao Redis: {str(e)}")
 
 
 def configure(

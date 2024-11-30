@@ -23,7 +23,6 @@ logger = AppLogger().get_logger()
 router = APIRouter()
 
 # Endpoint para registrar uma nova máquina
-@inject
 @router.post(
     "/machines",
     tags=["Machine Manage"],
@@ -52,7 +51,6 @@ def machine_register(
 
 
 # Endpoint para obter todas as máquinas registradas
-@inject
 @router.get(
     "/machines",
     tags=["Machine Manage"],
@@ -83,7 +81,6 @@ def get_machines(
 
 
 # Endpoint para obter uma máquina específica pelo número de série
-@inject
 @router.get(
     "/machines/{serial_number}",
     tags=["Machine Manage"],
@@ -113,7 +110,6 @@ def get_machine(
 
 
 # Endpoint para atualizar dados de uma máquina
-@inject
 @router.put(
     "/machines/{serial_number}",
     tags=["Machine Manage"],

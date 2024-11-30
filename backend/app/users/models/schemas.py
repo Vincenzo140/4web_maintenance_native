@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import (
     List,
     Optional
@@ -13,6 +13,7 @@ class LoginUserSchema(BaseModel):
 class CreateUserSchema(BaseModel):
     username: str
     password: str
+    email: EmailStr
 
 
 class ManageUsersPermissions(BaseModel):

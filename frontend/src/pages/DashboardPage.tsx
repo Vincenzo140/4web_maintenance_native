@@ -3,12 +3,14 @@ import {
   Settings, 
   Users, 
   WrenchIcon,
-  AlertTriangle, 
-  Eye
+  AlertTriangle,
+  Eye,
+  User
 } from 'lucide-react';
 import { fetchWithAuth } from '../services/api';
 import { Clock } from '../components/dashboard/Clock';
 import { useStatsStore } from '../store/statsStore';
+import { useAuthStore } from '../store/authStore';
 
 interface Stats {
   machines: number;
@@ -17,6 +19,12 @@ interface Stats {
 }
 
 export function DashboardPage() {
+  const { username } = useAuthStore();
+  
+  useEffect(() => {
+    console.log('Username in DashboardPage:', username);
+  }, [username]);
+
   const [stats, setStats] = useState<Stats>({
     machines: 0,
     teams: 0,
@@ -25,11 +33,26 @@ export function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { visitCount, incrementVisits } = useStatsStore();
+  const [systemStatus, setSystemStatus] = useState<'Tranquilo!' | 'Alerta!' | 'Ferrou!'>('Tranquilo!');
 
   useEffect(() => {
     incrementVisits();
     fetchStats();
   }, [incrementVisits]);
+
+  // || stats.teams < 2
+  // || stats.teams < 2
+
+  useEffect(() => {
+    // Atualizar o status do sistema com base nas estatísticas
+    if (stats.maintenanceCount > 50 || stats.teams < 2) { 
+      setSystemStatus('Ferrou!');
+    } else if (stats.maintenanceCount > 20 || stats.teams < 2) {
+      setSystemStatus('Alerta!');
+    } else {
+      setSystemStatus('Tranquilo!');
+    }
+  }, [stats]);
 
   const fetchStats = async () => {
     try {
@@ -53,6 +76,15 @@ export function DashboardPage() {
     }
   };
 
+  // useEffect(() => {
+  //   console.log('Username:', username);
+  // }, [username]);
+
+  useEffect(() => {
+    console.log('Username in DashboardPage:', username);
+  }, [username]);
+  
+  
   const StatCard = ({ 
     title, 
     value, 
@@ -109,7 +141,7 @@ export function DashboardPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Visão Geral do Sistema</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2"> Seja Bem-Vindo{username ? `, ${username}` : ''} </h1>
           <p className="text-gray-600">Monitore as métricas e indicadores principais do seu sistema</p>
         </div>
         <div className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-3">
@@ -151,7 +183,6 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-6 text-white">
           <h2 className="text-lg font-semibold mb-2">Resumo Rápido</h2>
-          <p className="text-blue-100 mb-4">Desempenho do sistema</p>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span>Utilização de Máquinas</span>
@@ -166,11 +197,18 @@ export function DashboardPage() {
 
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-6 text-white">
           <h2 className="text-lg font-semibold mb-2">Saúde do Sistema</h2>
-          <p className="text-purple-100 mb-4">Status geral do sistema</p>
           <div className="mt-2">
             <div className="flex items-center justify-between">
               <span>Status do Sistema</span>
-              <span className="px-3 py-1 bg-green-500 rounded-full text-sm font-medium">Operacional</span>
+              {systemStatus === 'Tranquilo!' && (
+                <span className="px-5 py-2 bg-green-500 rounded-full text-sm font-medium">Tranquilo!</span>
+              )}
+              {systemStatus === 'Alerta!' && (
+                <span className="px-3 py-1 bg-yellow-500 rounded-full text-sm font-medium">Alerta!</span>
+              )}
+              {systemStatus === 'Ferrou!' && (
+                <span className="px-3 py-1 bg-red-500 rounded-full text-sm font-medium">Ferrou!</span>
+              )}
             </div>
           </div>
         </div>

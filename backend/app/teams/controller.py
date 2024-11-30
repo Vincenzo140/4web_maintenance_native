@@ -160,7 +160,7 @@ def update_team(
             raise HTTPException(status_code=500, detail=f"Erro ao decodificar os dados da equipe: {str(e)}")
 
         # Atualizar os dados da equipe com as informações fornecidas
-        team_data_dict.update(team_update.model_dump())
+        team_data_dict.update(team_update.dict())
         team_data_json = json.dumps(team_data_dict)
 
         # Atualizar os dados da equipe no Redis

@@ -110,3 +110,4 @@ ruff_cache/
 *.swo
 *.tmp
 *~
+/__pycache__

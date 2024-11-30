@@ -8,19 +8,19 @@ from typing import (
 
 # Schema CRUD para Parts
 class CreatePartsSchema(BaseModel):
-    name: str
     code: str
-    supplier: str
+    description: str
+    location: str
+    name: str
     quantity: int
-    unit_price: float
 
 
 class UpdatePartsSchema(BaseModel):
-    name: Optional[str] = None
-    code: Optional[str] = None
-    supplier: Optional[str] = None
-    quantity: Optional[int] = None
-    unit_price: Optional[float] = None
+    code: Optional [str] = None
+    description: Optional [str] = None
+    location: Optional [str] = None
+    name: Optional [str] = None
+    quantity: Optional [int] = None
 
 
 class DeletePartsSchema(BaseModel):
@@ -32,8 +32,8 @@ class GetPartsSchema(BaseModel):
 
 
 class GetAllPartsSchema(BaseModel):
-    name: str
     code: str
-    supplier: str
+    description: str
+    location: str
+    name: str
     quantity: int
-    unit_price: float

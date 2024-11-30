@@ -36,10 +36,13 @@ def create_app() -> FastAPI:
     from app.maintenance import controller as maintenance_router
     from app.teams import controller as teams_router
     from app.users import controller as users_route
+    from app.tools import controller as tools_router
+    
 
     machine_router.configure(app)
     maintenance_router.configure(app)
     teams_router.configure(app)
     users_route.configure(app)
+    tools_router.configure(app)
 
     return app

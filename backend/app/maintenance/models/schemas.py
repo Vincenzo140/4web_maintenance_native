@@ -1,6 +1,7 @@
 from pydantic import BaseModel 
 from typing import Optional, List
 from datetime import date
+import uuid
 
 
 # Schema CRUD para Maintenance

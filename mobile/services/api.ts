@@ -1,9 +1,10 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://10.109.3.226:8000";
+// Define a URL base para o backend, com fallback para localhost
+const BACKEND_API_URL = process.env.BACKEND_API_URL || "http://localhost:8000";
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: BACKEND_API_URL,
 });
 
 export const getMachines = async () => {

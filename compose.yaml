@@ -43,6 +43,26 @@ services:
     networks:
       - app-network
 
+  mobile:
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile
+    container_name: mobile-app
+    command: npm start
+    volumes:
+      - ./mobile:/app
+    ports:
+      - "19000:19000" # Porta para o Expo DevTools
+      - "19001:19001" # Porta para o Expo (Metro Bundler)
+      - "19002:19002" # Porta para o Expo Web
+    environment:
+      # Captura automaticamente o IP do host
+      - BACKEND_API_URL=http://$(ip route get 1 | awk '{print $7; exit}'):8000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge

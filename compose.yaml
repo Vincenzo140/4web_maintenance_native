@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   backend:
     build:
@@ -14,6 +16,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    restart: always
     networks:
       - app-network
 
@@ -23,6 +26,7 @@ services:
     command: redis-server
     ports:
       - "6379:6379"
+    restart: always
     networks:
       - app-network
 
@@ -33,13 +37,14 @@ services:
     container_name: frontend-app
     environment:
       - FRONTEND_ENV=production
-      - VITE_BACKEND_API_URL=http://backend:8000  # Use o nome do serviço no Docker Compose
+      - VITE_BACKEND_API_URL=http://backend:8000
       - VITE_PWD_SIGNUP_ENABLED=true
       - VITE_GA_TRACKING_ID=your-ga-tracking-id
     ports:
       - "5173:80"
     depends_on:
       - backend
+    restart: always
     networks:
       - app-network
 
@@ -52,14 +57,14 @@ services:
     volumes:
       - ./mobile:/app
     ports:
-      - "19000:19000" # Porta para o Expo DevTools
-      - "19001:19001" # Porta para o Expo (Metro Bundler)
-      - "19002:19002" # Porta para o Expo Web
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
     environment:
-      # Captura automaticamente o IP do host
-      - BACKEND_API_URL=http://$(ip route get 1 | awk '{print $7; exit}'):8000
+      - BACKEND_API_URL=${BACKEND_API_URL}
     depends_on:
       - backend
+    restart: always
     networks:
       - app-network
 

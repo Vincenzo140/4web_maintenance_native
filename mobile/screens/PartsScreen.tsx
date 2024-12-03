@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from "react-native";
-import axios from "axios";
+import { View, FlatList, StyleSheet, ActivityIndicator } from "react-native";
+import { getParts } from "../services/api";
+import PartsHeader from "../src/components/PartsHeader";
+import PartCard from "../src/components/PartCard";
+import ErrorMessage from "../src/components/common/ErrorMessage";
 
 interface Part {
   code: string;
@@ -18,8 +21,8 @@ const PartsScreen: React.FC = () => {
   useEffect(() => {
     const fetchParts = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/parts");
-        setParts(response.data);
+        const data = await getParts();
+        setParts(data);
         setError(null);
       } catch (err) {
         setError("Erro ao carregar peças.");
@@ -34,17 +37,13 @@ const PartsScreen: React.FC = () => {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#1565C0" />
+        <ActivityIndicator size="large" color="#2196F3" />
       </View>
     );
   }
 
   if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
+    return <ErrorMessage message={error} />;
   }
 
   return (
@@ -52,14 +51,15 @@ const PartsScreen: React.FC = () => {
       data={parts}
       keyExtractor={(item) => item.code}
       renderItem={({ item }) => (
-        <View style={styles.card}>
-          <Text style={styles.title}>{item.name}</Text>
-          <Text>Descrição: {item.description}</Text>
-          <Text>Localização: {item.location}</Text>
-          <Text>Quantidade: {item.quantity}</Text>
-        </View>
+        <PartCard
+          name={item.name}
+          description={item.description}
+          location={item.location}
+          quantity={item.quantity}
+        />
       )}
       contentContainerStyle={styles.list}
+      ListHeaderComponent={<PartsHeader />}
     />
   );
 };
@@ -69,29 +69,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 18,
-    color: "red",
+    backgroundColor: "#F5F5F5",
   },
   list: {
-    padding: 16,
-  },
-  card: {
-    backgroundColor: "#E3F2FD",
-    padding: 16,
-    marginVertical: 8,
-    borderRadius: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1565C0",
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: "#F5F5F5",
   },
 });
 

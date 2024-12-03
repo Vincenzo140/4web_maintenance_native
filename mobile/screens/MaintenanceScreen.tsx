@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from "react-native";
-import axios from "axios";
+import { View, FlatList, StyleSheet, ActivityIndicator } from "react-native";
+import { getMaintenances } from "../services/api";
+import MaintenanceHeader from "../src/components/MaintenanceHeader";
+import MaintenanceCard from "../src/components/MaintenanceCard";
+import ErrorMessage from "../src/components/common/ErrorMessage";
 
 interface Maintenance {
   maintenance_register_id: string;
@@ -20,8 +23,8 @@ const MaintenanceScreen: React.FC = () => {
   useEffect(() => {
     const fetchMaintenances = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/maintenance");
-        setMaintenances(response.data);
+        const data = await getMaintenances();
+        setMaintenances(data);
         setError(null);
       } catch (err) {
         setError("Erro ao carregar manutenções.");
@@ -42,11 +45,7 @@ const MaintenanceScreen: React.FC = () => {
   }
 
   if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
+    return <ErrorMessage message={error} />;
   }
 
   return (
@@ -54,15 +53,17 @@ const MaintenanceScreen: React.FC = () => {
       data={maintenances}
       keyExtractor={(item) => item.maintenance_register_id}
       renderItem={({ item }) => (
-        <View style={styles.card}>
-          <Text style={styles.title}>{item.problem_description}</Text>
-          <Text>Data: {item.request_date}</Text>
-          <Text>Prioridade: {item.priority}</Text>
-          <Text>Equipe: {item.assigned_team_id}</Text>
-          <Text>Status: {item.status}</Text>
-        </View>
+        <MaintenanceCard
+          problemDescription={item.problem_description}
+          requestDate={item.request_date}
+          priority={item.priority}
+          assignedTeam={item.assigned_team_id}
+          status={item.status}
+          machineId={item.machine_id}
+        />
       )}
       contentContainerStyle={styles.list}
+      ListHeaderComponent={<MaintenanceHeader />}
     />
   );
 };
@@ -72,29 +73,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 18,
-    color: "red",
+    backgroundColor: "#F5F5F5",
   },
   list: {
-    padding: 16,
-  },
-  card: {
-    backgroundColor: "#E3F2FD",
-    padding: 16,
-    marginVertical: 8,
-    borderRadius: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1565C0",
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: "#F5F5F5",
   },
 });
 

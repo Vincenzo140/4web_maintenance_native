@@ -6,6 +6,7 @@ import MaintenanceScreen from "../../screens/MaintenanceScreen";
 import PartsScreen from "../../screens/PartsScreen";
 import TeamsScreen from "../../screens/TeamsScreen";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { colors } from "../theme";
 
 const Tab = createBottomTabNavigator();
 
@@ -29,9 +30,18 @@ const AppNavigation: React.FC = () => {
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: "#1565C0",
-          tabBarInactiveTintColor: "gray",
+          tabBarActiveTintColor: colors.primary.main,
+          tabBarInactiveTintColor: colors.text.disabled,
           headerShown: false,
+          tabBarStyle: {
+            borderTopColor: colors.border,
+            backgroundColor: colors.background.paper,
+            paddingTop: 8,
+            height: 60,
+          },
+          tabBarLabelStyle: {
+            paddingBottom: 8,
+          },
         })}
       >
         <Tab.Screen name="Máquinas" component={MachinesScreen} />

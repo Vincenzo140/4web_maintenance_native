@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, FlatList, StyleSheet } from "react-native";
 import { getMachines } from "../services/api";
-import MachineCard from "../components/MachineCard";
-import Header from "../components/Header";
-import FilterBar from "../components/FilterBar";
-import ErrorMessage from "../components/ErrorMessage";
-import LoadingIndicator from "../components/LoadingIndicator";
+import MachineCard from "../src/components/MachineCard";
+import Header from "../src/components/Header";
+import FilterBar from "../src/components/FilterBar";
+import ErrorMessage from "../src/components/common/ErrorMessage";
+import LoadingIndicator from "../src/components/common/LoadingIndicator";
 
 interface Machine {
   name: string;

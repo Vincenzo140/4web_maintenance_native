@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from "react-native";
-import axios from "axios";
+import { View, FlatList, StyleSheet, ActivityIndicator } from "react-native";
+import { getTeams } from "../services/api";
+import TeamsHeader from "../src/components/TeamsHeader";
+import TeamCard from "../src/components/TeamCard";
+import ErrorMessage from "../src/components/common/ErrorMessage";
 
 interface Team {
+  team_id?: string;
   name: string;
-  members: { member_id: number; name: string }[];
-  specialities: string[];
+  members: Array<string | number>;
+  specialities: string; // Alterado para string
 }
 
 const TeamsScreen: React.FC = () => {
@@ -16,10 +20,12 @@ const TeamsScreen: React.FC = () => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/teams");
-        setTeams(response.data);
+        const data = await getTeams();
+        console.log("Teams fetched:", data);
+        setTeams(data);
         setError(null);
       } catch (err) {
+        console.error("Error fetching teams:", err);
         setError("Erro ao carregar equipes.");
       } finally {
         setLoading(false);
@@ -38,28 +44,22 @@ const TeamsScreen: React.FC = () => {
   }
 
   if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
+    return <ErrorMessage message={error} />;
   }
 
   return (
     <FlatList
       data={teams}
-      keyExtractor={(item) => item.name}
+      keyExtractor={(item) => item.team_id || item.name}
       renderItem={({ item }) => (
-        <View style={styles.card}>
-          <Text style={styles.title}>{item.name}</Text>
-          <Text>Especialidades: {item.specialities.join(", ")}</Text>
-          <Text>Membros:</Text>
-          {item.members.map((member) => (
-            <Text key={member.member_id}>- {member.name}</Text>
-          ))}
-        </View>
+        <TeamCard
+          name={item.name}
+          members={item.members}
+          specialities={item.specialities} 
+        />
       )}
       contentContainerStyle={styles.list}
+      ListHeaderComponent={<TeamsHeader />}
     />
   );
 };
@@ -69,29 +69,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 18,
-    color: "red",
+    backgroundColor: "#F5F5F5",
   },
   list: {
-    padding: 16,
-  },
-  card: {
-    backgroundColor: "#E3F2FD",
-    padding: 16,
-    marginVertical: 8,
-    borderRadius: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1565C0",
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: "#F5F5F5",
   },
 });
 

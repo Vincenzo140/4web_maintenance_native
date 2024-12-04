@@ -1,0 +1,128 @@
+```markdown
+# ConsoleAppMonstro - Batalha de Monstros no Console!
+
+[![.NET 8](https://img.shields.io/badge/.NET-8-blue.svg)](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+[![xUnit](https://img.shields.io/badge/xUnit-2.4.1-brightgreen.svg)](https://xunit.net/)
+
+Bem-vindo ao ConsoleAppMonstro, um jogo de batalha de monstros baseado em turnos, construído em C# e .NET 8.0. Este projeto não só proporciona uma experiência divertida de jogo, mas também serve como um exemplo prático da implementação de vários padrões de design de software. Prepare-se para escolher seu monstro e lutar pela supremacia!
+
+
+## Visão Geral do Jogo
+
+ConsoleAppMonstro permite que dois jogadores se enfrentem em duelos épicos de monstros. Cada jogador escolhe um tipo de monstro e, em seguida, alterna entre turnos para realizar ações como atacar, defender ou usar habilidades especiais. A batalha continua até que a vida de um dos monstros chegue a zero. O jogo também possui um sistema de salvar/carregar para que você possa continuar suas batalhas mais tarde.
+
+
+## Padrões de Projeto Implementados
+
+Este projeto utiliza os seguintes padrões de projeto para garantir um código limpo, modular e extensível:
+
+* **Factory (MonstroFactory):**  Encapsula a criação de monstros, permitindo a fácil adição de novos tipos de monstros sem modificar o código do cliente.
+* **Strategy (IAcoesDeCombate):** Define uma família de algoritmos (atacar, defender, usar habilidade) que são intercambiáveis.  Facilita a adição de novas ações de combate.
+* **Memento (GameMemento, GameSaveManager):** Permite salvar e restaurar estados do jogo (pontuação) sem violar o encapsulamento, permitindo que os jogadores continuem de onde pararam.
+* **Singleton (GameState):** Garante que haja apenas uma instância do estado do jogo (pontuação), proporcionando acesso global.
+* **Observer (Jogador):** Notifica os jogadores sobre mudanças no estado do jogo, como a vida restante do seu monstro e do oponente.
+
+
+## Diagrama de Classes Simplificado
+
+```mermaid
+classDiagram
+    class Monstro {
+        <<abstract>>
+        string Nome
+        int Ataque
+        int Defesa
+        int Vida
+        UsarHabilidadeEspecial()
+    }
+    class Dragao {
+        UsarHabilidadeEspecial()
+    }
+    class Zumbi {
+        UsarHabilidadeEspecial()
+    }
+    class MonstroFactory {
+        <<static>>
+        CriarMonstro(string tipo) Monstro
+    }
+
+    class IAcoesDeCombate {
+        <<interface>>
+        Executar(Monstro atacante, Monstro defensor)
+    }
+    class Atacar
+    class Defender
+    class UsarHabilidade
+
+    class Jogador {
+        NotificarEstado()
+    }
+    class GameState {
+        <<singleton>>
+        int Pontuacao
+    }
+    class GameMemento {
+        int Pontuacao
+    }
+    class GameSaveManager {
+        SaveGame()
+        LoadGame()
+    }
+
+    Monstro <|-- Dragao
+    Monstro <|-- Zumbi
+    MonstroFactory -- Monstro
+    IAcoesDeCombate <|-- Atacar
+    IAcoesDeCombate <|-- Defender
+    IAcoesDeCombate <|-- UsarHabilidade
+
+    Jogador -- Monstro
+    
+    GameSaveManager -- GameMemento
+    GameMemento -- GameState
+
+
+```
+
+## Tecnologias Utilizadas
+
+* **[.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0):**  A plataforma robusta e versátil da Microsoft para a construção de diversos tipos de aplicações, incluindo jogos.
+* **[C#](https://learn.microsoft.com/pt-br/dotnet/csharp/):** Uma linguagem de programação moderna, orientada a objetos e type-safe, perfeita para desenvolvimento de jogos.
+* **[xUnit](https://xunit.net/):** Um framework de teste unitário popular e extensível para C#, garantindo a qualidade e a confiabilidade do código.
+
+
+
+## Como Executar
+
+1. **Pré-requisito:** Certifique-se de ter o [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) instalado em sua máquina.
+2. **Clone o Repositório:** Clone este repositório para o seu computador.
+3. **Navegue até a pasta:** Abra um terminal e navegue até o diretório `ConsoleAppMonstro`.
+4. **Execute o Jogo:** Digite o comando `dotnet run` e pressione Enter.
+
+## Como Rodar os Testes
+
+1. **Navegue até a pasta de testes:** Abra um terminal e navegue até o diretório `Tests`.
+2. **Execute os testes:** Use o comando `dotnet test`.
+
+
+## Próximos Passos e Melhorias Futuras
+
+* Implementar novos tipos de monstros com habilidades únicas.
+* Aprimorar a IA do oponente para um desafio mais estratégico.
+* Desenvolver uma interface gráfica para uma experiência mais imersiva (WinForms, WPF ou Console GUI Libraries).
+* Expandir o sistema de salvamento para incluir o estado completo do jogo.
+* Adicionar um sistema de níveis e experiência para progressão do jogador.
+* Refinar o balanceamento do jogo para garantir uma jogabilidade justa e emocionante.
+
+## Contribuições
+
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests.
+
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+
+```
+

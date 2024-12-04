@@ -48,26 +48,6 @@ services:
     networks:
       - app-network
 
-  mobile:
-    build:
-      context: ./mobile
-      dockerfile: Dockerfile
-    container_name: mobile-app
-    command: npm start
-    volumes:
-      - ./mobile:/app
-    ports:
-      - "19000:19000"
-      - "19001:19001"
-      - "19002:19002"
-    environment:
-      - BACKEND_API_URL=${BACKEND_API_URL}
-    depends_on:
-      - backend
-    restart: always
-    networks:
-      - app-network
-
 networks:
   app-network:
     driver: bridge

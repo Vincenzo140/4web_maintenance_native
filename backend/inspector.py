@@ -26,16 +26,16 @@ def plot_git_commits():
              'cyan', 'magenta', 'lime', 'teal', 'lavender', 'maroon', 'navy', 'olive', 'coral', 'indigo',
              'turquoise', 'violet', 'tan', 'salmon', 'khaki', 'orchid', 'gold', 'aquamarine', 'steelblue', 'peru']
     
-    commit_labels = ["feat: Adicionar funcionalidade de login",
-                     "fix: Corrigir bug na página de perfil",
-                     "build: Atualizar dependências",
-                     "chore: Limpar código de testes",
-                     "feat: Implementar página de registro",
-                     "fix: Resolver problema de validação de formulário",
-                     "build: Configurar pipeline de CI/CD",
-                     "chore: Atualizar documentação",
-                     "feat: Adicionar opção de trocar idioma",
-                     "fix: Corrigir erro de digitação no README"]
+    commit_labels = ["feat Adicionar funcionalidade de login",
+                     "fix Corrigir bug na página de perfil",
+                     "build Atualizar dependências",
+                     "chore Limpar código de testes",
+                     "feat Implementar página de registro",
+                     "fix Resolver problema de validação de formulário",
+                     "build Configurar pipeline de CI/CD",
+                     "chore Atualizar documentação",
+                     "feat Adicionar opção de trocar idioma",
+                     "fix Corrigir erro de digitação no README"]
     
     random_commits_labels = random.choice(commit_labels)
     random_color = random.choice(color)

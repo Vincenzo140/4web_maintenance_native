@@ -1,4 +1,4 @@
-# Sistema de Gerenciamento de Manutenção
+.md# Sistema de Gerenciamento de Manutenção
 
 Este é um sistema completo de gerenciamento de manutenção, construído com uma arquitetura moderna e escalável, que abrange backend (FastAPI), frontend (React com TypeScript) e mobile (React Native com Expo). O sistema permite o gerenciamento de máquinas, manutenções, peças e equipes, fornecendo uma solução integrada para otimizar as operações de manutenção.
 

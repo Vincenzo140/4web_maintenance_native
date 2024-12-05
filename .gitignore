@@ -1,0 +1,168 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.pyd
+*.pyo
+*.pyd
+*.coverage
+.coverage.*
+.cache/
+.pytest_cache/
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Vite/Node.js
+node_modules/
+dist/
+build/
+.vite/
+*.cache/
+.eslintcache
+package-lock.json
+yarn.lock
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Coverage reports
+htmlcov/
+coverage.xml
+*.cover
+*.cover.*
+.hypothesis/
+
+# Environment variables
+.env
+.env.*
+*.env
+
+# Linting and formatting
+.prettierignore
+.prettiercache
+.pylint.d/
+.mypy_cache/
+.mypy/
+.pyre/
+ruff_cache/
+
+# Compiled files
+*.egg-info/
+.eggs/
+*.whl
+*.so
+*.c
+*.o
+*.out
+
+# Pytest
+.pytest_cache/
+.tox/
+*.tox/
+
+# Static and build assets
+/static/
+*.min.js
+*.min.css
+*.map
+
+# Editor settings
+*.swp
+*.swo
+*.tmp
+*~
+/__pycache__
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+.babelrc
+
+# Expo
+.expo/
+.expo-shared/
+
+# TypeScript
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+
+# Watchman
+.watchmanconfig
+
+# Android/IntelliJ
+android/.gradle/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+android/output.json
+
+# iOS/Xcode
+ios/Pods/
+ios/*.xcodeproj/
+ios/*.xcworkspace/
+ios/build/
+ios/DerivedData/
+ios/*.plist
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Misc
+*.swp
+*.swo
+*.tmp
+*.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

@@ -12,7 +12,7 @@ def create_app() -> FastAPI:
     # Descrição que será exibida na documentação (Swagger UI)
     description_api_access = f"se quiser acessar as rotas vá para http://localhost:8000/docs", f"se quiser acessar a documentação vá para http://localhost:8000/redoc"
     description = """
-    # Bem-vindo(a) à E-commerce API!
+     Bem-vindo(a) à E-commerce API!
 
     Esta API fornece recursos para gerenciar um sistema de comércio eletrônico, incluindo:
     - Produtos
@@ -20,15 +20,14 @@ def create_app() -> FastAPI:
     - Equipes
     - Manutenção de máquinas
 
-    ---
 
-    ## Contato
+    Contato
 
     Em caso de dúvidas, por favor entre em contato:
 
-    - **Github:** [Vincenzo140](https://github.com/Vincenzo140)
-    - **LinkedIn:** [Vincenzo Amendola](https://www.linkedin.com/in/vincenzo-amendola-9aab38264/)
-    - **Email:** [vincenzo.amendola141@gmail.com](mailto:vincenzo.amendola141@gmail.com)
+    - Github: (https://github.com/Vincenzo140)
+    - LinkedIn: (https://www.linkedin.com/in/vincenzo-amendola-9aab38264/)
+    - Email: (mailto:vincenzo.amendola141@gmail.com)
     """
 
     app = FastAPI(

@@ -1,4 +1,4 @@
-.md# Sistema de Gerenciamento de Manutenção
+# Sistema de Gerenciamento de Manutenção
 
 Este é um sistema completo de gerenciamento de manutenção, construído com uma arquitetura moderna e escalável, que abrange backend (FastAPI), frontend (React com TypeScript) e mobile (React Native com Expo). O sistema permite o gerenciamento de máquinas, manutenções, peças e equipes, fornecendo uma solução integrada para otimizar as operações de manutenção.
 
@@ -57,7 +57,6 @@ graph LR
 [![React Navigation](https://img.shields.io/badge/React_Navigation-009688?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnavigation.org/)
 [![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)](https://axios-http.com/)
 
-
 ## Funcionalidades
 
 * **Gerenciamento de Máquinas:** Cadastro, atualização, exclusão e visualização de máquinas com informações detalhadas, incluindo histórico de manutenção.
@@ -87,11 +86,18 @@ graph LR
 1. Navegue até a pasta `mobile`.
 2. Instale as dependências: `npm install` ou `yarn`
 3. Rode o projeto: `npm start`
+4. Coloque seu IP público no arquivo `services/api.ts`.
 
 ### Docker
 
 1. Certifique-se de ter o Docker e o Docker Compose instalados.
 2. Na raiz do projeto, execute: `docker-compose up --build`
+
+### Se tiveres Linux
+
+1. Na raiz do projeto, execute: `chmod +x ./start.sh`
+2. Então execute `./start.sh`
+3. Não esqueça de colocar seu IP público na pasta `mobile/services/api.ts`
    
 ## Estrutura de Pastas
 
@@ -119,18 +125,64 @@ graph LR
 
 Vincenzo Amendola - vincenzo.amendola141@gmail.com
 
-
 ## Screenshots
 
+### Backend - API Routes
+**Descrição:** Documentação dos endpoints da API.
 
-**Backend - Commits:**
+<img src="./docs/backend/Screenshot%20From%202024-12-12%2016-20-04.png" alt="API Routes Documentation 1" width="500" />
+<img src="./docs/backend/Screenshot%20From%202024-12-12%2016-20-50.png" alt="API Routes Documentation 2" width="500" />
+<img src="./docs/backend/Screenshot%20From%202024-12-12%2016-20-57.png" alt="API Routes Documentation 3" width="500" />
+<img src="./docs/backend/Screenshot%20From%202024-12-12%2016-21-01.png" alt="API Routes Documentation 4" width="500" />
 
-Aqui deveria ter uma imagem gerada pelo matplotlib no backend, porém não consigo acessar o repositorio para copiar a imagem.
+### Frontend - Telas
 
-**Frontend - Dashboard:**
+**Home Screen:** Página inicial do sistema.  
+<img src="./docs/frontend/Screenshot%20From%202024-12-12%2015-53-38.png" alt="Home Screen" width="500" />
 
-Aqui deveria ter uma imagem do dashboard do frontend, porém não consigo acessar o repositorio para copiar a imagem.
+**Login Screen:** Tela de login de usuários.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-04%20172632.png" alt="Login Screen" width="500" />
 
-**Mobile - Tela de Máquinas:**
+**SignUp Screen:** Tela de cadastro de novos usuários.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-04%20172609.png" alt="SignUp Screen" width="500" />
 
-Aqui deveria ter uma imagem do app mobile, porém não consigo acessar o repositorio para copiar a imagem.
+**Dashboard Screen:** Visão geral das métricas do sistema.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-05%20172820.png" alt="Dashboard Screen" width="500" />
+
+**Machines Screen:** Listagem de máquinas cadastradas.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-04%20173509.png" alt="Machines Screen" width="500" />
+
+**Create Machines Screen:** Formulário de criação de novas máquinas.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-04%20173358.png" alt="Create Machines Screen" width="500" />
+
+**Maintenance Screen:** Listagem de manutenções.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-04%20174402.png" alt="Maintenance Screen" width="500" />
+
+**Create Maintenance Screen:** Formulário de criação de manutenção.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-04%20174418.png" alt="Create Maintenance Screen" width="500" />
+
+**Parts Screen:** Listagem de peças.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-05%20172748.png" alt="Parts Screen" width="500" />
+
+**Create Parts Screen:** Formulário de criação de peças.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-05%20172734.png" alt="Create Parts Screen" width="500" />
+
+**Teams Screen:** Listagem de equipes.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-04%20173845.png" alt="Teams Screen" width="500" />
+
+**Create Teams Screen:** Formulário de criação de equipes.  
+<img src="./docs/frontend/Captura%20de%20tela%202024-12-04%20173829.png" alt="Create Teams Screen" width="500" />
+
+### Mobile - Telas
+
+**Maintenance Screen (Mobile):** Tela de manutenção no aplicativo móvel.  
+<img src="./docs/mobile/Mídia%20(1).jpeg" alt="Mobile Maintenance Screen" width="300" />
+
+**Machine Screen (Mobile):** Tela de detalhes da máquina no aplicativo móvel.  
+<img src="./docs/mobile/Mídia.jpeg" alt="Mobile Machine Screen" width="300" />
+
+**Parts Screen (Mobile):** Tela de listagem de peças no aplicativo móvel.  
+<img src="./docs/mobile/Mídia%20(2).jpeg" alt="Mobile Parts Screen" width="300" />
+
+**Teams Screen (Mobile):** Tela de equipes no aplicativo móvel.  
+<img src="./docs/mobile/Mídia%20(3).jpeg" alt="Mobile Teams Screen" width="300" />

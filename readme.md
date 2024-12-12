@@ -187,5 +187,10 @@ Vincenzo Amendola - vincenzo.amendola141@gmail.com
 **Teams Screen (Mobile):** Tela de equipes no aplicativo móvel.  
 <img src="./docs/mobile/Mídia%20(3).jpeg" alt="Mobile Teams Screen" width="300" />
 
----- Acesse o Vídeo de Demonstração ----
-![Vídeo Demonstração](https://www.youtube.com/watch?v=Mw9N5JbX4ks)
+## Acesse o Vídeo de Demonstração
+
+[Clique aqui para assistir ao vídeo de demonstração](https://www.youtube.com/watch?v=Mw9N5JbX4ks)
+
+Ou clique na imagem abaixo:
+
+[![Vídeo Demonstração](https://img.youtube.com/vi/Mw9N5JbX4ks/0.jpg)](https://www.youtube.com/watch?v=Mw9N5JbX4ks)

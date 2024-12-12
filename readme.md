@@ -93,6 +93,12 @@ graph LR
 
 1. Certifique-se de ter o Docker e o Docker Compose instalados.
 2. Na raiz do projeto, execute: `docker-compose up --build`
+
+### Se tiveres linux 
+
+1. Na raiz do projeto, execute: `chmod +x ./start.sh`
+2. Então execute `./start.sh`
+3. Não esqueça de colocar seu ip público na pasta `mobile/services/api.ts`
    
 ## Estrutura de Pastas
 
@@ -130,7 +136,12 @@ Aqui deveria ter uma imagem gerada pelo matplotlib no backend, porém não consi
 
 **Frontend - Dashboard:**
 
-Aqui deveria ter uma imagem do dashboard do frontend, porém não consigo acessar o repositorio para copiar a imagem.
+![Home Screen](./docs/frontend/)
+![Login Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20172632.png)
+![SignUp Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20172609.png)
+
+
+
 
 **Mobile - Tela de Máquinas:**
 

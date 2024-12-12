@@ -87,6 +87,7 @@ graph LR
 1. Navegue até a pasta `mobile`.
 2. Instale as dependências: `npm install` ou `yarn`
 3. Rode o projeto: `npm start`
+4. coloca seu ip publico no arquivo services/api.ts
 
 ### Docker
 

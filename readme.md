@@ -134,23 +134,54 @@ Vincenzo Amendola - vincenzo.amendola141@gmail.com
 
 Aqui deveria ter uma imagem gerada pelo matplotlib no backend, porém não consigo acessar o repositorio para copiar a imagem.
 
-**Frontend - Dashboard:**
+**Frontend - Home Screen:**
 
 ![Home Screen](./docs/frontend/Screenshot%20From%202024-12-12%2015-53-38.png)
+
+**Frontend - Login Screen:**
 ![Login Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20172632.png)
+
+**Frontend - SignUp Screen:**
 ![SignUp Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20172609.png)
+
+**Frontend - Dashboard Screen:**
 ![Dashboard Screen](./docs/frontend/Captura%20de%20tela%202024-12-05%20172820.png)
+
+**Frontend - Machines Screen:**
 ![Machines Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20173509.png)
+
+**Frontend - Create Machines Screen**
 ![Create Machines Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20173358.png)
+
+**Frontend - Maintenance Screen**
 ![Maintenance Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20174402.png)
+
+**Frontend - Create Maintenance Screen**
 ![Create Maintenance Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20174418.png)
+
+**Frontend - Parts Screen**
 ![Parts Screen](./docs/frontend/Captura%20de%20tela%202024-12-05%20172748.png)
+
+**Frontend - Create Parts Screen**
 ![Create Parts Screen](./docs/frontend/Captura%20de%20tela%202024-12-05%20172734.png)
+
+**Frontend - Teams Screen**
 ![Teams Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20173845.png)
+
+**Frontend - Create Teams Screen**
 ![Create Teams Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20173829.png)
 
 
 
-**Mobile - Tela de Máquinas:**
+**Mobile - Maintenance Screen:**
+![Maintenance Screen](./docs/mobile/Mídia%20(1).jpeg)
 
-Aqui deveria ter uma imagem do app mobile, porém não consigo acessar o repositorio para copiar a imagem.
+**Mobile - Machine Screen**
+![Machine Screen](./docs/mobile/Mídia.jpeg)
+
+**Mobile - Parts Screen**
+![Parts Screen](./docs/mobile/Mídia%20(2).jpeg)
+
+**Mobile - Teams Screen**
+![Teams Screen](./docs/mobile/Mídia%20(3).jpeg)
+

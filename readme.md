@@ -136,10 +136,18 @@ Aqui deveria ter uma imagem gerada pelo matplotlib no backend, porém não consi
 
 **Frontend - Dashboard:**
 
-![Home Screen](./docs/frontend/)
+![Home Screen](./docs/frontend/Screenshot%20From%202024-12-12%2015-53-38.png)
 ![Login Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20172632.png)
 ![SignUp Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20172609.png)
-
+![Dashboard Screen](./docs/frontend/Captura%20de%20tela%202024-12-05%20172820.png)
+![Machines Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20173509.png)
+![Create Machines Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20173358.png)
+![Maintenance Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20174402.png)
+![Create Maintenance Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20174418.png)
+![Parts Screen](./docs/frontend/Captura%20de%20tela%202024-12-05%20172748.png)
+![Create Parts Screen](./docs/frontend/Captura%20de%20tela%202024-12-05%20172734.png)
+![Teams Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20173845.png)
+![Create Teams Screen](./docs/frontend/Captura%20de%20tela%202024-12-04%20173829.png)
 
 
 

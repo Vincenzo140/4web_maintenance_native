@@ -10,15 +10,27 @@ logger = logging.getLogger("ManagementSystem")
 
 def create_app() -> FastAPI:
     # Descrição que será exibida na documentação (Swagger UI)
+    description_api_access = f"se quiser acessar as rotas vá para http://localhost:8000/docs", f"se quiser acessar a documentação vá para http://localhost:8000/redoc"
     description = """
-    Por qualquer dúvida, por favor contate:
+    # Bem-vindo(a) à E-commerce API!
 
-    * Github: [https://github.com/Vincenzo140](https://github.com/Vincenzo140)
-    * LinkedIn: [https://www.linkedin.com/in/vincenzo-amendola-9aab38264/](https://www.linkedin.com/in/vincenzo-amendola-9aab38264/)
-    * Email:  [vincenzo.amendola141@gmail.com](mailto:vincenzo.amendola141@gmail.com)
+    Esta API fornece recursos para gerenciar um sistema de comércio eletrônico, incluindo:
+    - Produtos
+    - Usuários
+    - Equipes
+    - Manutenção de máquinas
+
+    ---
+
+    ## Contato
+
+    Em caso de dúvidas, por favor entre em contato:
+
+    - **Github:** [Vincenzo140](https://github.com/Vincenzo140)
+    - **LinkedIn:** [Vincenzo Amendola](https://www.linkedin.com/in/vincenzo-amendola-9aab38264/)
+    - **Email:** [vincenzo.amendola141@gmail.com](mailto:vincenzo.amendola141@gmail.com)
     """
 
-    # Criação da aplicação FastAPI
     app = FastAPI(
         title="E-commerce API",
         version="1.1.0",
@@ -43,6 +55,7 @@ def create_app() -> FastAPI:
         },
     )
 
+
     # Configurações de CORS (Cross-Origin Resource Sharing)
     CORS_SETTINGS = {
         "allow_origins": ["*"],  # Permite qualquer origem. Em produção, seja mais restritivo.
@@ -64,16 +77,7 @@ def create_app() -> FastAPI:
     @app.get("/")
     def read_root():
         logger.info("Servidor iniciado com sucesso")
-        if os.getenv("ENV") == "production":
-            return {
-                "message": app.title,
-                "version": app.version,
-            }
-        return {
-            "message": app.title,
-            "version": app.version,
-            "description": app.description,
-        }
+        return description_api_access
 
     # Importa e configura as rotas de cada módulo
     from app.machines import controller as machine_router
